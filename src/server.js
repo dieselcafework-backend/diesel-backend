@@ -51,6 +51,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+app.get('/ping', (req, res) => {
+  res.status(200).send('Server is alive');
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found.' });
