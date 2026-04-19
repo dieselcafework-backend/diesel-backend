@@ -1,11 +1,12 @@
 const express = require('express');
 const Order = require('../models/Order');
 const { protect } = require('../middleware/auth');
+const requireShopOpen = require('../middleware/shopStatus');
 
 const router = express.Router();
 
 // POST /orders — public (customer places order)
-router.post('/', async (req, res) => {
+router.post('/', requireShopOpen, async (req, res) => {
   try {
     const { customerName, tableNumber, items, note } = req.body;
     if (!customerName || !tableNumber || !items || items.length === 0) {

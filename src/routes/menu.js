@@ -1,11 +1,12 @@
 const express = require('express');
 const MenuItem = require('../models/Menu');
 const { protect } = require('../middleware/auth');
+const requireShopOpen = require('../middleware/shopStatus');
 
 const router = express.Router();
 
 // GET /menu — public
-router.get('/', async (req, res) => {
+router.get('/', requireShopOpen, async (req, res) => {
   try {
     const { superCategory, available } = req.query;
     const filter = {};
