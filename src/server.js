@@ -20,7 +20,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'https://golden-bienenstitch-ef8519.netlify.app',
+    origin: process.env.FRONTEND_URL || 'https://dieselcafe.netlify.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
