@@ -1,35 +1,44 @@
 /**
  * routes/menu.js
  *
- * ── ONLY CHANGE vs original ──────────────────────────────────────────────────
- * Added `requireShopOpen` middleware to  GET /  (public route).
- * When the shop is closed this returns 403, which CustomerMenu.jsx already
- * handles — it checks `err.response?.status === 403` and shows the closed screen.
- * All admin routes (POST, PUT, DELETE) are untouched and work regardless of shop status.
- * ─────────────────────────────────────────────────────────────────────────────
+ * FIX: Admin requests (with JWT Bearer token) bypass requireShopOpen.
+ * Customers without a token still get 403 when the shop is closed.
+ * All write routes (POST, PUT, DELETE) are admin-only and unaffected.
  */
 
 const express         = require('express');
 const MenuItem        = require('../models/Menu');
 const { protect }     = require('../middleware/auth');
-const requireShopOpen = require('../middleware/shopStatus'); // ← NEW import
+const requireShopOpen = require('../middleware/shopStatus');
 
 const router = express.Router();
 
 // ── GET /api/menu ─────────────────────────────────────────────────────────────
-// Public — guarded by requireShopOpen (returns 403 when closed)
-router.get('/', requireShopOpen, async (req, res) => {   // ← requireShopOpen added
-  try {
-    const items = await MenuItem
-      .find({})
-      .sort({ superCategory: 1, subCategory: 1, name: 1 })
-      .lean();
-    res.json(items);
-  } catch (err) {
-    console.error('[menu GET]', err.message);
-    res.status(500).json({ message: 'Failed to fetch menu.' });
+// Public customers → gated by requireShopOpen (403 when closed)
+// Admin with JWT  → bypasses shop status check (always works)
+router.get(
+  '/',
+  (req, res, next) => {
+    // If request carries an admin JWT, skip the shop-status gate entirely
+    if (req.headers.authorization?.startsWith('Bearer ')) {
+      return next();
+    }
+    // No token = customer request → apply shop-status check
+    return requireShopOpen(req, res, next);
+  },
+  async (req, res) => {
+    try {
+      const items = await MenuItem
+        .find({})
+        .sort({ superCategory: 1, subCategory: 1, name: 1 })
+        .lean();
+      res.json(items);
+    } catch (err) {
+      console.error('[menu GET]', err.message);
+      res.status(500).json({ message: 'Failed to fetch menu.' });
+    }
   }
-});
+);
 
 // ── POST /api/menu ────────────────────────────────────────────────────────────
 router.post('/', protect, async (req, res) => {
