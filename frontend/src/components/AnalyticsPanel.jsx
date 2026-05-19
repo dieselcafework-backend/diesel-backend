@@ -148,7 +148,7 @@ const AnalyticsPanel = () => {
     ];
 
     return (
-        <div style={{ fontFamily: 'Poppins, sans-serif' }}>
+        <div className='p-4' style={{ fontFamily: 'Poppins, sans-serif' }}>
 
             {/* ── Period tabs ──────────────────────────────────────────────────────── */}
             <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>

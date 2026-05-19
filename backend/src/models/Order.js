@@ -1,43 +1,53 @@
 const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
-  menuItem: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'MenuItem',
-  },
-  name: { type: String, required: true },
-  price: { type: Number, required: true },
-  quantity: { type: Number, required: true, min: 1 },
-  veg: { type: Boolean, default: true },
+  menuItem: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem' },
+  name:     { type: String,  required: true },
+  price:    { type: Number,  required: true },
+  quantity: { type: Number,  required: true, min: 1 },
+  veg:      { type: Boolean, default: true },
 });
 
 const orderSchema = new mongoose.Schema(
   {
-    customerName: {
+    customerName: { type: String, required: true, trim: true },
+    phoneNumber:  { type: String, default: '', trim: true },
+    tableNumber:  { type: String, required: true, trim: true },
+
+    orderType: {
       type: String,
-      required: true,
-      trim: true,
+      enum: ['dine-in', 'takeaway'],
+      default: 'dine-in',
     },
-    tableNumber: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    items: [orderItemSchema],
-    totalAmount: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
+
+    items:       [orderItemSchema],
+    totalAmount: { type: Number, required: true, min: 0 },
+
     status: {
       type: String,
       enum: ['pending', 'accepted', 'preparing', 'ready', 'completed'],
       default: 'pending',
     },
-    note: {
+
+    note: { type: String, default: '' },
+
+    // ── UPI Payment fields (takeaway only) ─────────────────────
+    paymentStatus: {
       type: String,
-      default: '',
+      enum: [
+        'not_required',        // dine-in
+        'pending_verification',// takeaway — UTR submitted, admin must verify
+        'paid',                // admin verified
+        'failed',              // marked failed by admin
+      ],
+      default: 'not_required',
     },
+
+    // UTR = Unique Transaction Reference — 12-digit UPI transaction ID
+    utrNumber: { type: String, default: '', trim: true },
+
+    // Daily pickup token e.g. "T-001"
+    pickupToken: { type: String, default: '' },
   },
   { timestamps: true }
 );
