@@ -46,7 +46,7 @@ const Navbar = ({ onCartClick }) => {
               className="font-black tracking-widest uppercase text-sm"
               style={{ fontFamily: '"Playfair Display", serif', color: '#ede8d0', letterSpacing: '0.18em' }}
             >
-              Diesel
+              Demo
             </p>
             <p
               className="font-light text-[10px] uppercase tracking-[0.5em] -mt-0.5"
