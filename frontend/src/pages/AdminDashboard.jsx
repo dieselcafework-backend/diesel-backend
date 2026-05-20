@@ -202,6 +202,15 @@ const AdminDashboard = () => {
     } catch (_) { toast.error('Failed to update status'); }
   };
 
+  // ── Verify takeaway payment ───────────────────────────────────────────────────
+  const verifyPayment = async (id) => {
+    try {
+      await api.put(`/orders/${id}`, { paymentStatus: 'paid' });
+      setOrders((prev) => prev.map((o) => o._id === id ? { ...o, paymentStatus: 'paid' } : o));
+      toast.success('Payment verified ✅');
+    } catch (_) { toast.error('Failed to verify payment'); }
+  };
+
   // ── Delete order — direct (no WhatsApp) ──────────────────────────────────────
   const deleteOrderDirect = async (order) => {
     setActionLoading(true);
@@ -292,27 +301,6 @@ const AdminDashboard = () => {
   const filteredOrders = orders
     .filter((o) => statusFilter === 'all' || o.status === statusFilter)
     .filter((o) => orderTypeFilter === 'all' || (o.orderType || 'dine-in') === orderTypeFilter);
-
-  <div className="flex gap-2 mt-2">
-    {[
-      { id: 'all', label: 'All Types' },
-      { id: 'dine-in', label: '🍽️ Dine In' },
-      { id: 'takeaway', label: '🛍️ Takeaway' },
-    ].map((t) => (
-      <button
-        key={t.id}
-        onClick={() => setOrderTypeFilter(t.id)}
-        className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
-        style={{
-          background: orderTypeFilter === t.id ? '#325862' : 'white',
-          color: orderTypeFilter === t.id ? 'white' : '#6b7280',
-          borderColor: orderTypeFilter === t.id ? '#325862' : '#e5e7eb',
-        }}
-      >
-        {t.label}
-      </button>
-    ))}
-  </div>
 
   // ── Loading screen ────────────────────────────────────────────────────────────
   if (loading) return (
@@ -460,6 +448,25 @@ const AdminDashboard = () => {
               )}
             </div>
 
+            {/* Order type filter row */}
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              {[
+                { id: 'all',      label: 'All Types' },
+                { id: 'dine-in',  label: '🍽️ Dine In' },
+                { id: 'takeaway', label: '🛍️ Takeaway' },
+              ].map((t) => (
+                <button key={t.id} onClick={() => setOrderTypeFilter(t.id)}
+                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                  style={{
+                    background:  orderTypeFilter === t.id ? '#940901' : (document.documentElement.classList.contains('dark') ? '#374151' : 'white'),
+                    color:       orderTypeFilter === t.id ? 'white' : '#6b7280',
+                    borderColor: orderTypeFilter === t.id ? '#940901' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#e5e7eb'),
+                  }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
             {/* Orders list */}
             {filteredOrders.length === 0 ? (
               <div className={`py-16 text-center ${C.card} rounded-2xl shadow-sm`}>
@@ -512,6 +519,43 @@ const AdminDashboard = () => {
                   ))}
                   {order.note && <p className={`${C.muted} text-xs italic mt-1.5 border-t ${C.border} pt-1.5`}>📝 {order.note}</p>}
                 </div>
+
+                {/* Takeaway — pickup token, UTR, payment method, verify button */}
+                {order.orderType === 'takeaway' && (
+                  <div className={`px-4 pb-3 border-t ${C.border} pt-2 flex flex-wrap gap-2 items-center`}>
+                    {order.pickupToken && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black"
+                        style={{ background: 'rgba(148,9,1,0.1)', color: '#940901', border: '1px solid rgba(148,9,1,0.25)' }}>
+                        🎫 {order.pickupToken}
+                      </span>
+                    )}
+                    {order.utrNumber && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold"
+                        style={{ background: 'rgba(0,123,139,0.08)', color: '#007B8B', border: '1px solid rgba(0,123,139,0.2)' }}>
+                        🔗 {order.utrNumber}
+                      </span>
+                    )}
+                    {order.paymentMethod && order.paymentMethod !== 'not_required' && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold"
+                        style={{ background: 'rgba(214,153,60,0.1)', color: '#b37d2e', border: '1px solid rgba(214,153,60,0.25)' }}>
+                        {order.paymentMethod === 'upi' ? '📱 UPI' : order.paymentMethod === 'debit-card' ? '💳 Debit' : '💳 Credit'}
+                      </span>
+                    )}
+                    {order.paymentStatus === 'pending_verification' && (
+                      <button onClick={() => verifyPayment(order._id)}
+                        className="ml-auto px-3 py-1 rounded-lg text-xs font-black text-white active:scale-95 transition-all"
+                        style={{ background: 'linear-gradient(135deg,#059669,#047857)' }}>
+                        ✓ Verify Payment
+                      </button>
+                    )}
+                    {order.paymentStatus === 'paid' && (
+                      <span className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold"
+                        style={{ background: 'rgba(5,150,105,0.1)', color: '#059669', border: '1px solid rgba(5,150,105,0.25)' }}>
+                        ✅ Verified
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div className={`border-t ${C.border} px-4 py-2.5 flex gap-2`}>

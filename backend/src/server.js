@@ -6,11 +6,11 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const connectDB = require("./config/db");
-
-const authRoutes       = require("./routes/auth");
-const menuRoutes       = require("./routes/menu");
-const orderRoutes      = require("./routes/orders");
-const analyticsRoutes  = require("./routes/analyticsRoutes");
+const paymentRoutes = require('./routes/payments')
+const authRoutes = require("./routes/auth");
+const menuRoutes = require("./routes/menu");
+const orderRoutes = require("./routes/orders");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 const shopStatusRoutes = require("./routes/shopStatus");
 
 const app = express();
@@ -74,10 +74,11 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // ── Routes ────────────────────────────────────────────────────────────────────
-app.use("/api/auth",        authRoutes);
-app.use("/api/menu",        menuRoutes);
-app.use("/api/orders",      orderRoutes);
-app.use("/api/analytics",   analyticsRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/menu", menuRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use("/api/shop-status", shopStatusRoutes);
 
 app.get("/api/health", (req, res) => {

@@ -31,20 +31,27 @@ const orderSchema = new mongoose.Schema(
 
     note: { type: String, default: '' },
 
-    // ── UPI Payment fields (takeaway only) ─────────────────────
+    // ── UPI Payment fields (takeaway only) ──────────────────────────────────
     paymentStatus: {
       type: String,
       enum: [
-        'not_required',        // dine-in
-        'pending_verification',// takeaway — UTR submitted, admin must verify
-        'paid',                // admin verified
-        'failed',              // marked failed by admin
+        'not_required',         // dine-in
+        'pending_verification', // takeaway — UTR submitted, admin must verify
+        'paid',                 // admin verified
+        'failed',               // marked failed by admin
       ],
       default: 'not_required',
     },
 
-    // UTR = Unique Transaction Reference — 12-digit UPI transaction ID
+    // UTR = Unique Transaction Reference — transaction ID from payment app
     utrNumber: { type: String, default: '', trim: true },
+
+    // ── NEW: which payment method customer used ──────────────────────────────
+    paymentMethod: {
+      type: String,
+      enum: ['upi', 'debit-card', 'credit-card', 'not_required'],
+      default: 'not_required',
+    },
 
     // Daily pickup token e.g. "T-001"
     pickupToken: { type: String, default: '' },

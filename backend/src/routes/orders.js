@@ -22,6 +22,7 @@ router.post('/', requireShopOpen, async (req, res) => {
     const {
       customerName, tableNumber, items, note,
       orderType, phoneNumber, utrNumber,
+      paymentMethod, // ← NEW
     } = req.body;
 
     if (!customerName || !tableNumber || !items || items.length === 0) {
@@ -40,12 +41,18 @@ router.post('/', requireShopOpen, async (req, res) => {
       }
     }
 
-    const totalAmount  = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    const pickupToken  = isTakeaway ? await generatePickupToken() : '';
+    const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const pickupToken = isTakeaway ? await generatePickupToken() : '';
+
+    // Validate paymentMethod — default to 'upi' for takeaway if not provided
+    const validMethods = ['upi', 'debit-card', 'credit-card'];
+    const resolvedPaymentMethod = isTakeaway
+      ? (validMethods.includes(paymentMethod) ? paymentMethod : 'upi')
+      : 'not_required';
 
     const order = new Order({
       customerName,
-      phoneNumber:   phoneNumber  || '',
+      phoneNumber:   phoneNumber   || '',
       tableNumber:   isTakeaway ? 'Takeaway' : tableNumber,
       orderType:     isTakeaway ? 'takeaway' : 'dine-in',
       items,
@@ -53,6 +60,7 @@ router.post('/', requireShopOpen, async (req, res) => {
       note:          note || '',
       paymentStatus: isTakeaway ? 'pending_verification' : 'not_required',
       utrNumber:     isTakeaway ? utrNumber.trim() : '',
+      paymentMethod: resolvedPaymentMethod, // ← NEW
       pickupToken,
     });
 
@@ -116,16 +124,12 @@ router.get('/daily-stats', protect, async (req, res) => {
       status:    { $ne: 'cancelled' },
     });
 
-    const totalSales     = orders.reduce((sum, o) => sum + o.totalAmount, 0);
-    const totalOrders    = orders.length;
-    const dineInOrders   = orders.filter((o) => (o.orderType || 'dine-in') === 'dine-in').length;
-    const takeawayOrders = orders.filter((o) => o.orderType === 'takeaway').length;
-    const takeawaySales  = orders
-      .filter((o) => o.orderType === 'takeaway')
-      .reduce((sum, o) => sum + o.totalAmount, 0);
-    const pendingVerification = orders.filter(
-      (o) => o.paymentStatus === 'pending_verification'
-    ).length;
+    const totalSales          = orders.reduce((sum, o) => sum + o.totalAmount, 0);
+    const totalOrders         = orders.length;
+    const dineInOrders        = orders.filter((o) => (o.orderType || 'dine-in') === 'dine-in').length;
+    const takeawayOrders      = orders.filter((o) => o.orderType === 'takeaway').length;
+    const takeawaySales       = orders.filter((o) => o.orderType === 'takeaway').reduce((sum, o) => sum + o.totalAmount, 0);
+    const pendingVerification = orders.filter((o) => o.paymentStatus === 'pending_verification').length;
 
     res.json({
       totalSales, totalOrders,
@@ -139,7 +143,6 @@ router.get('/daily-stats', protect, async (req, res) => {
 });
 
 // ── PUT /orders/:id — admin only ──────────────────────────────────────────────
-// Handles both status update AND payment verification
 router.put('/:id', protect, async (req, res) => {
   try {
     const { status, paymentStatus } = req.body;
