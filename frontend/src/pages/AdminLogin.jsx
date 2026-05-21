@@ -12,8 +12,8 @@ const AdminLogin = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('velvet_vault_admin_token');
-    if (token) navigate('/admin/dashboard');
-  }, [navigate]);
+    if (token) navigate('/admin/dashboard', { replace: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +23,7 @@ const AdminLogin = () => {
     try {
       const res = await api.post('/auth/login', { email: email.trim(), password });
       localStorage.setItem('velvet_vault_admin_token', res.data.token);
-      navigate('/admin/dashboard');
+      navigate('/admin/dashboard', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Check your credentials.');
     } finally {

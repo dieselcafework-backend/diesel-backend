@@ -117,18 +117,31 @@ const AdminDashboard = () => {
   // ── Auth check ────────────────────────────────────────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem('velvet_vault_admin_token');
-    if (!token) return navigate('/admin/login');
+    if (!token) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Add padding to handle tokens without correct base64 padding
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64 + '=='.slice((base64.length % 4 || 4) - 1);
+      const payload = JSON.parse(atob(padded));
       setAdminName(payload.name || 'Admin');
-      if (payload.exp * 1000 < Date.now()) handleLogout();
-    } catch (_) { handleLogout(); }
-  }, []);
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        localStorage.removeItem('velvet_vault_admin_token');
+        navigate('/admin/login', { replace: true });
+      }
+    } catch (_) {
+      // Token unreadable — clear and redirect once
+      localStorage.removeItem('velvet_vault_admin_token');
+      navigate('/admin/login', { replace: true });
+    }
+  }, [navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem('velvet_vault_admin_token');
-    navigate('/admin/login');
-  };
+    navigate('/admin/login', { replace: true });
+  }, [navigate]);
 
   // ── Logo upload (admin only) ──────────────────────────────────────────────────
   const handleLogoUpload = (e) => {

@@ -8,7 +8,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('diesel_admin_token');
+  const token = localStorage.getItem('velvet_vault_admin_token');
   if (!token) return <Navigate to="/admin/login" replace />;
   return children;
 };
