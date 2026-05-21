@@ -1,18 +1,15 @@
-# Dependencies
+# dependencies
 node_modules/
 
-# Production build
+# builds
 dist/
 
-# Environment variables
+# env files
 .env
+.env.*
 
-# VS Code settings
-.vscode/
-
-# Logs
+# logs
 *.log
 
-# OS files
-.DS_Store
-Thumbs.db
+# executables
+*.exe
