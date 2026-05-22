@@ -99,6 +99,7 @@ const AdminDashboard = () => {
   const [menuForm, setMenuForm] = useState({
     superCategory: 'Snacks', subCategory: '', name: '', description: '',
     price: '', veg: true, image: '', available: true,
+    halfPrice: '', fullPrice: '', halfDescription: '', fullDescription: '',
   });
   const [editingId, setEditingId] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -272,22 +273,52 @@ const AdminDashboard = () => {
   // ── Menu CRUD ─────────────────────────────────────────────────────────────────
   const openAddForm = () => {
     setEditingId(null);
-    setMenuForm({ superCategory: 'Snacks', subCategory: '', name: '', description: '', price: '', veg: true, image: '', available: true });
+    setMenuForm({ superCategory: 'Snacks', subCategory: '', name: '', description: '', price: '', veg: true, image: '', available: true, halfPrice: '', fullPrice: '', halfDescription: '', fullDescription: '' });
     setFormError(''); setFormOpen(true);
   };
 
   const openEditForm = (item) => {
     setEditingId(item._id);
-    setMenuForm({ superCategory: item.superCategory, subCategory: item.subCategory, name: item.name, description: item.description || '', price: String(item.price), veg: item.veg, image: item.image || '', available: item.available });
+    setMenuForm({
+      superCategory:   item.superCategory,
+      subCategory:     item.subCategory,
+      name:            item.name,
+      description:     item.description    || '',
+      price:           String(item.price),
+      veg:             item.veg,
+      image:           item.image          || '',
+      available:       item.available,
+      halfPrice:       item.halfPrice  != null ? String(item.halfPrice)  : '',
+      fullPrice:       item.fullPrice  != null ? String(item.fullPrice)  : '',
+      halfDescription: item.halfDescription || '',
+      fullDescription: item.fullDescription || '',
+    });
     setFormError(''); setFormOpen(true);
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!menuForm.name.trim() || !menuForm.subCategory.trim() || !menuForm.price) return setFormError('Name, subcategory and price are required.');
+    if (!menuForm.name.trim() || !menuForm.subCategory.trim()) return setFormError('Name and subcategory are required.');
+    const hasPrice     = menuForm.price     !== '' && menuForm.price     !== null;
+    const hasHalfPrice = menuForm.halfPrice  !== '' && menuForm.halfPrice  !== null;
+    const hasFullPrice = menuForm.fullPrice  !== '' && menuForm.fullPrice  !== null;
+    if (!hasPrice && !hasHalfPrice && !hasFullPrice) return setFormError('At least one price (Regular, Half, or Full) is required.');
     setFormLoading(true); setFormError('');
     try {
-      const payload = { ...menuForm, price: Number(menuForm.price) };
+      // Derive fallback price: fullPrice → halfPrice → price
+      const resolvedPrice = hasPrice
+        ? Number(menuForm.price)
+        : hasFullPrice
+          ? Number(menuForm.fullPrice)
+          : Number(menuForm.halfPrice);
+      const payload = {
+        ...menuForm,
+        price:           resolvedPrice,
+        halfPrice:       hasHalfPrice ? Number(menuForm.halfPrice)  : null,
+        fullPrice:       hasFullPrice ? Number(menuForm.fullPrice)  : null,
+        halfDescription: menuForm.halfDescription || '',
+        fullDescription: menuForm.fullDescription || '',
+      };
       if (editingId) { await api.put(`/menu/${editingId}`, payload); toast.success('Item updated'); }
       else { await api.post('/menu', payload); toast.success('Item added'); }
       await fetchMenu(); setFormOpen(false);
@@ -530,7 +561,21 @@ const AdminDashboard = () => {
                 <div className={`px-4 pb-3 space-y-1 border-t ${C.border} pt-2`}>
                   {order.items.map((item, idx) => (
                     <div key={idx} className="flex justify-between text-sm">
-                      <span className={`${C.text} font-medium`}>{item.name} <span className={`${C.muted} font-normal`}>×{item.quantity}</span></span>
+                      <span className={`${C.text} font-medium flex items-center gap-1.5 flex-wrap`}>
+                        {item.name}
+                        {item.selectedSize && (
+                          <span
+                            className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide"
+                            style={{
+                              background: item.selectedSize === 'half' ? 'rgba(214,153,60,0.2)' : 'rgba(0,123,139,0.12)',
+                              color:      item.selectedSize === 'half' ? '#b37d2e'              : '#007B8B',
+                            }}
+                          >
+                            {item.selectedSize === 'half' ? 'Half' : 'Full'}
+                          </span>
+                        )}
+                        <span className={`${C.muted} font-normal`}>×{item.quantity}</span>
+                      </span>
                       <span className={`${C.muted} text-xs`}>₹{item.price * item.quantity}</span>
                     </div>
                   ))}
@@ -850,8 +895,8 @@ const AdminDashboard = () => {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={`block ${C.muted} font-bold text-xs mb-1`}>Price (₹) *</label>
-                  <input type="number" value={menuForm.price} onChange={(e) => setMenuForm({ ...menuForm, price: e.target.value })} placeholder="0" min="0"
+                  <label className={`block ${C.muted} font-bold text-xs mb-1`}>Price (₹)</label>
+                  <input type="number" value={menuForm.price} onChange={(e) => setMenuForm({ ...menuForm, price: e.target.value })} placeholder="Regular price" min="0"
                     className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#007B8B] ${C.input}`} />
                 </div>
                 <div>
@@ -861,6 +906,33 @@ const AdminDashboard = () => {
                     <option value="veg">🟢 Veg</option>
                     <option value="nonveg">🔴 Non-Veg</option>
                   </select>
+                </div>
+              </div>
+
+              {/* ── Half / Full Plate Pricing ── */}
+              <div className="rounded-xl p-3 space-y-3" style={{ background: 'rgba(0,123,139,0.05)', border: '1px solid rgba(0,123,139,0.15)' }}>
+                <p className={`text-xs font-black uppercase tracking-widest ${C.muted}`}>Half / Full Plate (optional)</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={`block ${C.muted} font-bold text-xs mb-1`}>Half Price (₹)</label>
+                    <input type="number" value={menuForm.halfPrice} onChange={(e) => setMenuForm({ ...menuForm, halfPrice: e.target.value })} placeholder="e.g. 80" min="0"
+                      className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#007B8B] ${C.input}`} />
+                  </div>
+                  <div>
+                    <label className={`block ${C.muted} font-bold text-xs mb-1`}>Full Price (₹)</label>
+                    <input type="number" value={menuForm.fullPrice} onChange={(e) => setMenuForm({ ...menuForm, fullPrice: e.target.value })} placeholder="e.g. 140" min="0"
+                      className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#007B8B] ${C.input}`} />
+                  </div>
+                </div>
+                <div>
+                  <label className={`block ${C.muted} font-bold text-xs mb-1`}>Half Plate Description</label>
+                  <input type="text" value={menuForm.halfDescription} onChange={(e) => setMenuForm({ ...menuForm, halfDescription: e.target.value })} placeholder="e.g. 3 pcs, great for one"
+                    className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#007B8B] ${C.input}`} />
+                </div>
+                <div>
+                  <label className={`block ${C.muted} font-bold text-xs mb-1`}>Full Plate Description</label>
+                  <input type="text" value={menuForm.fullDescription} onChange={(e) => setMenuForm({ ...menuForm, fullDescription: e.target.value })} placeholder="e.g. 6 pcs, perfect for sharing"
+                    className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#007B8B] ${C.input}`} />
                 </div>
               </div>
               <div>
