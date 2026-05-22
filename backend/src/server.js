@@ -6,12 +6,13 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const connectDB = require("./config/db");
-const paymentRoutes = require('./routes/payments')
-const authRoutes = require("./routes/auth");
-const menuRoutes = require("./routes/menu");
-const orderRoutes = require("./routes/orders");
+const paymentRoutes  = require('./routes/payments')
+const authRoutes     = require("./routes/auth");
+const menuRoutes     = require("./routes/menu");
+const orderRoutes    = require("./routes/orders");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const shopStatusRoutes = require("./routes/shopStatus");
+const pushRoutes     = require("./routes/push");
 
 const app = express();
 
@@ -80,6 +81,7 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/shop-status", shopStatusRoutes);
+app.use("/api/push", pushRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({

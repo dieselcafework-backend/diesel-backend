@@ -2,8 +2,49 @@ const express = require('express');
 const Order   = require('../models/Order');
 const { protect }     = require('../middleware/auth');
 const requireShopOpen = require('../middleware/shopStatus');
+const webpush          = require('web-push');
+const PushSubscription = require('../models/PushSubscription');
 
 const router = express.Router();
+
+// ── VAPID setup ───────────────────────────────────────────────────────────────
+webpush.setVapidDetails(
+  'mailto:admin@velvetvault.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+
+// ── Send push notification to all subscribed admin devices ───────────────────
+const sendOrderPush = async (order) => {
+  try {
+    const subs = await PushSubscription.find({});
+    if (!subs.length) return;
+
+    const payload = JSON.stringify({
+      title: '🛎️ New Order — Velvet Vault',
+      body:  `${order.orderType === 'takeaway' ? '🥡 Takeaway' : `🪑 Table ${order.tableNumber}`} · ${order.customerName} · ₹${order.totalAmount}`,
+      orderId: String(order._id),
+    });
+
+    const results = await Promise.allSettled(
+      subs.map((sub) =>
+        webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, payload)
+      )
+    );
+
+    // Clean up expired / invalid subscriptions automatically
+    results.forEach((result, i) => {
+      if (result.status === 'rejected') {
+        const code = result.reason?.statusCode;
+        if (code === 404 || code === 410) {
+          PushSubscription.deleteOne({ endpoint: subs[i].endpoint }).catch(() => {});
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Push notification error:', err);
+  }
+};
 
 // ── Generate daily pickup token T-001, T-002… ─────────────────────────────────
 const generatePickupToken = async () => {
@@ -65,6 +106,10 @@ router.post('/', requireShopOpen, async (req, res) => {
     });
 
     await order.save();
+
+    // Fire push to all admin devices — non-blocking, won't delay the response
+    sendOrderPush(order).catch(() => {});
+
     res.status(201).json(order);
   } catch (err) {
     console.error('Place order error:', err);

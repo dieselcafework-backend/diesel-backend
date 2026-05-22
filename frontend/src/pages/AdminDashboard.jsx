@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 import ThemeToggle from '../components/ThemeToggle';
 import ChangePassword from '../components/ChangePassword';
 import ShopToggle from '../components/ShopToggle';
@@ -59,7 +60,7 @@ const STATUS_COLORS = {
 const NEXT_STATUS = { pending: 'accepted', accepted: 'preparing', preparing: 'ready', ready: 'completed' };
 const STATUS_LABELS = { pending: 'Pending', accepted: 'Accepted', preparing: 'Preparing', ready: 'Ready', completed: 'Completed' };
 const NEXT_LABELS = { pending: '✓ Accept', accepted: '🍳 Start Cooking', preparing: '✅ Mark Ready', ready: '🍽️ Complete' };
-const SUPER_CATS = ['Chinese','Snacks','Pasta & Maggie','Beverages','Combos',];
+const SUPER_CATS = ['Chinese', 'Snacks', 'Pasta & Maggie', 'Beverages', 'Combos',];
 
 // ── Reusable bits ──────────────────────────────────────────────────────────────
 const Spinner = () => (
@@ -84,6 +85,7 @@ const Modal = ({ onClose, children }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { supported: pushSupported, subscribed: pushSubscribed, loading: pushLoading, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushNotifications();
   const [tab, setTab] = useState('orders');
   const [orders, setOrders] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -94,6 +96,7 @@ const AdminDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [orderTypeFilter, setOrderTypeFilter] = useState('all')
   const [adminName, setAdminName] = useState('Admin');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Menu form state
   const [menuForm, setMenuForm] = useState({
@@ -115,6 +118,8 @@ const AdminDashboard = () => {
   const [logoPreview, setLogoPreview] = useState(localStorage.getItem('velvet_vault_logo_url') || '');
 
   const pollRef = useRef(null);
+  const knownOrderIdsRef = useRef(null);   // null = first fetch not yet done
+  const titleFlashRef = useRef(null);
 
   // ── Auth check ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -146,6 +151,34 @@ const AdminDashboard = () => {
     localStorage.removeItem('velvet_vault_admin_token');
     navigate('/admin/login', { replace: true });
   }, [navigate]);
+
+  // ── Notification sound — Web Audio API, no audio file needed ─────────────────
+  const playNotificationSound = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      // Three rising tones: a pleasant "ding ding ding"
+      [[880, 0, 0.22], [1100, 0.18, 0.22], [1320, 0.36, 0.35]].forEach(([freq, start, dur]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, ctx.currentTime + start);
+        gain.gain.linearRampToValueAtTime(0.28, ctx.currentTime + start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + dur + 0.05);
+      });
+    } catch (_) { /* AudioContext blocked — silently ignore */ }
+  }, []);
+
+  // ── Clear notifications (call when admin views orders) ───────────────────────
+  const clearNotifications = useCallback(() => {
+    setUnreadCount(0);
+    clearInterval(titleFlashRef.current);
+    document.title = 'Velvet Vault Admin';
+  }, []);
 
   // ── Logo upload (admin only) ──────────────────────────────────────────────────
   const handleLogoUpload = (e) => {
@@ -187,13 +220,77 @@ const AdminDashboard = () => {
     try {
       if (!silent) setRefreshing(true);
       const res = await api.get('/orders');
-      setOrders(res.data);
+      const incoming = res.data;
+
+      // ── New-order detection ─────────────────────────────────────────────
+      if (knownOrderIdsRef.current === null) {
+        // Very first fetch: seed the known-IDs set, no alert
+        knownOrderIdsRef.current = new Set(incoming.map((o) => o._id));
+      } else {
+        const newOrders = incoming.filter((o) => !knownOrderIdsRef.current.has(o._id));
+        if (newOrders.length > 0) {
+          // Add new IDs to the known set
+          newOrders.forEach((o) => knownOrderIdsRef.current.add(o._id));
+
+          // 1. Sound alert
+          playNotificationSound();
+
+          // 2. Tab-title flash (stops when clearNotifications is called)
+          clearInterval(titleFlashRef.current);
+          let show = true;
+          titleFlashRef.current = setInterval(() => {
+            document.title = show ? '🔔 New Order — Velvet Vault' : 'Velvet Vault Admin';
+            show = !show;
+          }, 900);
+
+          // 3. Increment bell badge
+          setUnreadCount((c) => c + newOrders.length);
+
+          // 4. Toast notification (max 3, then a summary)
+          newOrders.slice(0, 3).forEach((order) => {
+            toast.custom(() => (
+              <div style={{
+                background: 'linear-gradient(135deg,#243f47,#325862)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '16px',
+                padding: '14px 16px',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                minWidth: '280px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                fontFamily: 'Montserrat, sans-serif',
+              }}>
+                <span style={{ fontSize: '24px', lineHeight: 1 }}>🛎️</span>
+                <div>
+                  <p style={{ color: '#d6993c', fontWeight: 900, fontSize: '13px', margin: 0, letterSpacing: '0.05em' }}>
+                    New Order!
+                  </p>
+                  <p style={{ color: 'white', fontSize: '12px', margin: '4px 0 0', fontWeight: 600 }}>
+                    {order.orderType === 'takeaway' ? '🥡 Takeaway' : `🪑 Table ${order.tableNumber}`}
+                    {' · '}{order.customerName}
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', margin: '3px 0 0' }}>
+                    {order.items.length} item{order.items.length !== 1 ? 's' : ''} · ₹{order.totalAmount}
+                  </p>
+                </div>
+              </div>
+            ), { duration: 7000, position: 'top-right' });
+          });
+
+          if (newOrders.length > 3) {
+            toast(`+${newOrders.length - 3} more new orders`, { icon: '📦', duration: 5000 });
+          }
+        }
+      }
+
+      setOrders(incoming);
     } catch (_) {
       if (!silent) toast.error('Failed to refresh orders');
     } finally {
       if (!silent) setRefreshing(false);
     }
-  }, []);
+  }, [playNotificationSound]);
 
   const fetchMenu = useCallback(async () => { try { const r = await api.get('/menu'); setMenuItems(r.data); } catch (_) { } }, []);
   const fetchStats = useCallback(async () => { try { const r = await api.get('/orders/daily-stats'); setStats({ totalSales: r.data.totalSales, totalOrders: r.data.totalOrders }); } catch (_) { } }, []);
@@ -209,6 +306,13 @@ const AdminDashboard = () => {
     pollRef.current = setInterval(() => fetchOrders(true), 5000);
     return () => clearInterval(pollRef.current);
   }, [authReady]);  // ← was [], now depends on authReady
+
+  // Clear notifications when the window regains focus on the orders tab
+  useEffect(() => {
+    const onFocus = () => { if (tab === 'orders') clearNotifications(); };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [tab, clearNotifications]);
 
   // ── Order status update ───────────────────────────────────────────────────────
   const updateOrderStatus = async (id, status) => {
@@ -280,16 +384,16 @@ const AdminDashboard = () => {
   const openEditForm = (item) => {
     setEditingId(item._id);
     setMenuForm({
-      superCategory:   item.superCategory,
-      subCategory:     item.subCategory,
-      name:            item.name,
-      description:     item.description    || '',
-      price:           String(item.price),
-      veg:             item.veg,
-      image:           item.image          || '',
-      available:       item.available,
-      halfPrice:       item.halfPrice  != null ? String(item.halfPrice)  : '',
-      fullPrice:       item.fullPrice  != null ? String(item.fullPrice)  : '',
+      superCategory: item.superCategory,
+      subCategory: item.subCategory,
+      name: item.name,
+      description: item.description || '',
+      price: String(item.price),
+      veg: item.veg,
+      image: item.image || '',
+      available: item.available,
+      halfPrice: item.halfPrice != null ? String(item.halfPrice) : '',
+      fullPrice: item.fullPrice != null ? String(item.fullPrice) : '',
       halfDescription: item.halfDescription || '',
       fullDescription: item.fullDescription || '',
     });
@@ -299,9 +403,9 @@ const AdminDashboard = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!menuForm.name.trim() || !menuForm.subCategory.trim()) return setFormError('Name and subcategory are required.');
-    const hasPrice     = menuForm.price     !== '' && menuForm.price     !== null;
-    const hasHalfPrice = menuForm.halfPrice  !== '' && menuForm.halfPrice  !== null;
-    const hasFullPrice = menuForm.fullPrice  !== '' && menuForm.fullPrice  !== null;
+    const hasPrice = menuForm.price !== '' && menuForm.price !== null;
+    const hasHalfPrice = menuForm.halfPrice !== '' && menuForm.halfPrice !== null;
+    const hasFullPrice = menuForm.fullPrice !== '' && menuForm.fullPrice !== null;
     if (!hasPrice && !hasHalfPrice && !hasFullPrice) return setFormError('At least one price (Regular, Half, or Full) is required.');
     setFormLoading(true); setFormError('');
     try {
@@ -313,9 +417,9 @@ const AdminDashboard = () => {
           : Number(menuForm.halfPrice);
       const payload = {
         ...menuForm,
-        price:           resolvedPrice,
-        halfPrice:       hasHalfPrice ? Number(menuForm.halfPrice)  : null,
-        fullPrice:       hasFullPrice ? Number(menuForm.fullPrice)  : null,
+        price: resolvedPrice,
+        halfPrice: hasHalfPrice ? Number(menuForm.halfPrice) : null,
+        fullPrice: hasFullPrice ? Number(menuForm.fullPrice) : null,
         halfDescription: menuForm.halfDescription || '',
         fullDescription: menuForm.fullDescription || '',
       };
@@ -397,6 +501,25 @@ const AdminDashboard = () => {
               </div>
             )}
 
+            {/* Notification bell */}
+            <button
+              onClick={() => { setTab('orders'); clearNotifications(); }}
+              title="Notifications"
+              className="relative w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+              </svg>
+              {unreadCount > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center"
+                  style={{ animation: 'pulse 1.5s ease infinite' }}
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
             {/* Refresh */}
             <button onClick={() => fetchOrders(false)} disabled={refreshing} title="Refresh"
               className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors disabled:opacity-50">
@@ -446,7 +569,7 @@ const AdminDashboard = () => {
             { id: 'analytics', label: 'Analytics' },
             { id: 'settings', label: 'Settings' },
           ].map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
+            <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'orders') clearNotifications(); }}
               className="flex-1 sm:flex-none sm:px-6 py-3.5 text-xs font-black uppercase tracking-widest border-b-2 transition-all relative"
               style={{
                 borderBottomColor: tab === t.id ? '#007B8B' : 'transparent',
@@ -568,7 +691,7 @@ const AdminDashboard = () => {
                             className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide"
                             style={{
                               background: item.selectedSize === 'half' ? 'rgba(214,153,60,0.2)' : 'rgba(0,123,139,0.12)',
-                              color:      item.selectedSize === 'half' ? '#b37d2e'              : '#007B8B',
+                              color: item.selectedSize === 'half' ? '#b37d2e' : '#007B8B',
                             }}
                           >
                             {item.selectedSize === 'half' ? 'Half' : 'Full'}
@@ -585,6 +708,12 @@ const AdminDashboard = () => {
                 {/* Takeaway — pickup token, UTR, payment method, verify button */}
                 {order.orderType === 'takeaway' && (
                   <div className={`px-4 pb-3 border-t ${C.border} pt-2 flex flex-wrap gap-2 items-center`}>
+                    {order.phoneNumber && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold"
+                        style={{ background: 'rgba(49,96,61,0.1)', color: '#31603D', border: '1px solid rgba(49,96,61,0.25)' }}>
+                        📞 {order.phoneNumber}
+                      </span>
+                    )}
                     {order.pickupToken && (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black"
                         style={{ background: 'rgba(148,9,1,0.1)', color: '#940901', border: '1px solid rgba(148,9,1,0.25)' }}>
@@ -757,6 +886,52 @@ const AdminDashboard = () => {
         {tab === 'settings' && (
           <div className="space-y-5">
             <ShopToggle />
+
+            {/* ── Push Notifications ── */}
+            {pushSupported && (
+              <div className={`${C.card} rounded-2xl shadow-sm overflow-hidden`}>
+                <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg,#325862,#d6993c)' }} />
+                <div className="p-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: pushSubscribed ? 'linear-gradient(135deg,#059669,#047857)' : 'linear-gradient(135deg,#325862,#243f47)' }}>
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
+                          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h2 className={`font-black text-base ${C.text}`}>Push Notifications</h2>
+                        <p className={`text-xs ${C.muted}`}>
+                          {pushSubscribed
+                            ? '✅ Active on this device — works even when tab is closed'
+                            : 'Get alerted even when tab is closed or screen is off'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={pushSubscribed ? pushUnsubscribe : pushSubscribe}
+                      disabled={pushLoading}
+                      className="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-black text-white transition-all disabled:opacity-50"
+                      style={{
+                        background: pushSubscribed
+                          ? 'linear-gradient(135deg,#dc2626,#b91c1c)'
+                          : 'linear-gradient(135deg,#059669,#047857)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                      }}
+                    >
+                      {pushLoading ? '…' : pushSubscribed ? 'Disable' : 'Enable'}
+                    </button>
+                  </div>
+                  {pushSubscribed && (
+                    <p className={`text-[11px] ${C.muted} mt-3 pt-3 border-t ${C.border}`}>
+                      💡 Enable on each device/browser you want to receive alerts on. Each one subscribes separately.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* ── Logo Upload (admin only) ── */}
             <div className={`${C.card} rounded-2xl shadow-sm overflow-hidden`}>
               {/* Card header strip */}
