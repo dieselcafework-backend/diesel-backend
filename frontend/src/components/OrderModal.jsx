@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
+import { saveMyOrder } from '../utils/myOrders';
 
 // ── UPI config from env vars ──────────────────────────────────────────────────
 const CAFE_UPI_ID = import.meta.env.VITE_CAFE_UPI_ID || '9696028522@ybl';
@@ -148,6 +149,18 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
         setSavedOrderType('dine-in');
         setOrderId(res.data._id);
         setStep('success');
+        // ── Save to My Orders (localStorage) before cart is cleared ──────
+        saveMyOrder({
+          orderId:      res.data._id,
+          customerName: name.trim(),
+          tableNumber:  table.trim(),
+          orderType:    'dine-in',
+          items:        items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, veg: i.veg })),
+          totalAmount,
+          pickupToken:  '',
+          placedAt:     new Date().toISOString(),
+          note:         note.trim(),
+        });
         clearCart();
         toast.success('Order placed! Kitchen notified.', { icon: '🛎️', duration: 4000 });
       } catch (err) {
@@ -185,6 +198,18 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
       setPaymentStatus(res.data.paymentStatus);
       setOrderId(res.data._id);
       setStep('success');
+      // ── Save to My Orders (localStorage) before cart is cleared ────────
+      saveMyOrder({
+        orderId:      res.data._id,
+        customerName: name.trim(),
+        tableNumber:  'Takeaway',
+        orderType:    'takeaway',
+        items:        items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, veg: i.veg })),
+        totalAmount,
+        pickupToken:  res.data.pickupToken || '',
+        placedAt:     new Date().toISOString(),
+        note:         note.trim(),
+      });
       clearCart();
       toast.success(`Order placed! Pickup: ${res.data.pickupToken}`, { icon: '🛍️', duration: 5000 });
     } catch (err) {

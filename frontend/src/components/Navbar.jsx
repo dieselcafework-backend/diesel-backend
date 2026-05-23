@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import api from '../api/axios';
 
 
-const Navbar = ({ onCartClick }) => {
+const Navbar = ({ onCartClick, onOrdersClick, ordersCount = 0 }) => {
   const { totalItems, totalAmount } = useCart();
   const [logoUrl, setLogoUrl] = useState(localStorage.getItem('velvet_logo_url') || '');
 
@@ -67,30 +67,61 @@ const Navbar = ({ onCartClick }) => {
           MENU
         </span>
 
-        {/* ── Cart button ────────────────────────────────────── */}
-        <button
-          onClick={onCartClick}
-          className="relative flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200 active:scale-95 flex-shrink-0"
-          style={{
-            background: 'rgba(214,153,60,0.15)',
-            borderColor: 'rgba(214, 152, 60, 0.84)',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(214,153,60,0.28)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(214,153,60,0.15)'; }}
-          aria-label="Open cart"
-        >
-          <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: '#d6993c' }}>
-            <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.1 17 7 17h11v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21 5H5.21l-.67-3H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
-          </svg>
-          {totalItems > 0 && (
-            <>
-              <span className="text-white text-xs font-bold hidden sm:inline" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                ₹{totalAmount}
+        {/* ── Right buttons ──────────────────────────────────── */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* My Orders button */}
+          <button
+            onClick={onOrdersClick}
+            className="relative flex items-center gap-1.5 px-3 py-2 rounded-full border transition-all duration-200 active:scale-95"
+            style={{
+              background: 'rgba(214,153,60,0.15)',
+              borderColor: 'rgba(214,152,60,0.84)',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(214,153,60,0.28)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(214,153,60,0.15)'; }}
+            aria-label="My Orders"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: '#d6993c' }}>
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/>
+            </svg>
+            <span className="text-xs font-bold hidden sm:inline" style={{ color: '#d6993c', fontFamily: 'Poppins, sans-serif' }}>
+              Orders
+            </span>
+            {ordersCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-white"
+                style={{ background: '#982829' }}
+              >
+                {ordersCount > 9 ? '9+' : ordersCount}
               </span>
-              <span className="cart-badge">{totalItems > 99 ? '99+' : totalItems}</span>
-            </>
-          )}
-        </button>
+            )}
+          </button>
+
+          {/* Cart button */}
+          <button
+            onClick={onCartClick}
+            className="relative flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200 active:scale-95"
+            style={{
+              background: 'rgba(214,153,60,0.15)',
+              borderColor: 'rgba(214, 152, 60, 0.84)',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(214,153,60,0.28)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(214,153,60,0.15)'; }}
+            aria-label="Open cart"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: '#d6993c' }}>
+              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.1 17 7 17h11v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21 5H5.21l-.67-3H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+            </svg>
+            {totalItems > 0 && (
+              <>
+                <span className="text-white text-xs font-bold hidden sm:inline" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  ₹{totalAmount}
+                </span>
+                <span className="cart-badge">{totalItems > 99 ? '99+' : totalItems}</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </nav>
   );
