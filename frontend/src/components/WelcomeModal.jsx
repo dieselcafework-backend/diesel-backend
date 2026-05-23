@@ -54,7 +54,7 @@ const WelcomeModal = ({ tableNo }) => {
             style={{ fontFamily: '"Poppins", serif', color: '#64690c' }}
           >
             Welcome to<br />
-            <span style={{ color: '#982829' }}>Diesel Cafe</span>
+            <span style={{ color: '#982829' }}>Velvet Vault Cafe</span>
           </h1>
 
           {/* Subtitle */}
