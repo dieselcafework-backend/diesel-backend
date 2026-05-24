@@ -82,6 +82,124 @@ const Modal = ({ onClose, children }) => (
   </div>
 );
 
+// ── Table QR Code Generator ───────────────────────────────────────────────────
+const QRGenerator = () => {
+  const [tableCount, setTableCount] = React.useState('');
+  const [generated,  setGenerated]  = React.useState(false);
+
+  const baseUrl = window.location.origin; // e.g. https://velvet-vault.netlify.app
+  const count   = Math.min(Math.max(parseInt(tableCount) || 0, 1), 50);
+
+  const qrUrl = (n) =>
+    `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(`${baseUrl}?table=${n}`)}`;
+
+  const handlePrint = () => {
+    const win = window.open('', '_blank');
+    const tableNums = Array.from({ length: count }, (_, i) => i + 1);
+    win.document.write(`
+      <html><head><title>Table QR Codes — Velvet Vault</title>
+      <style>
+        body { margin: 0; font-family: 'Georgia', serif; background: #fff; }
+        h1 { text-align: center; color: #982829; font-size: 22px; margin: 24px 0 4px; letter-spacing: 0.2em; text-transform: uppercase; }
+        p  { text-align: center; color: #888; font-size: 12px; margin: 0 0 24px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 0 24px 40px; }
+        .card { border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 16px 12px 12px; text-align: center; break-inside: avoid; }
+        .card img { width: 140px; height: 140px; display: block; margin: 0 auto; }
+        .label { font-size: 15px; font-weight: 900; color: #1a1a1a; margin-top: 10px; letter-spacing: 0.05em; }
+        .sub   { font-size: 10px; color: #aaa; margin-top: 3px; word-break: break-all; }
+        @media print { .grid { grid-template-columns: repeat(4, 1fr); } }
+      </style></head><body>
+      <h1>Velvet Vault</h1>
+      <p>Scan to order from your table</p>
+      <div class="grid">
+        ${tableNums.map((n) => `
+          <div class="card">
+            <img src="${qrUrl(n)}" alt="Table ${n} QR" />
+            <div class="label">Table ${n}</div>
+            <div class="sub">${baseUrl}?table=${n}</div>
+          </div>`).join('')}
+      </div>
+      </body></html>`);
+    win.document.close();
+    setTimeout(() => win.print(), 800);
+  };
+
+  return (
+    <div className="rounded-2xl shadow-sm overflow-hidden" style={{ border: '1px solid rgba(214,153,60,0.2)' }}>
+      <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg,#325862,#d6993c)' }} />
+      <div className="p-5">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg,#325862,#243f47)' }}>
+            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
+              <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13 0h-2v2h2v-2zm0 4h-2v2h2v-2zm2-4h-2v2h2v-2zm0 4h-2v2h2v-2zm-4-8h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h-2v2h2v-2z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 className="font-black text-base" style={{ color: '#1a1a1a' }}>Table QR Codes</h2>
+            <p className="text-xs text-gray-400">Generate & print QR codes for each table</p>
+          </div>
+        </div>
+
+        {/* Input row */}
+        <div className="flex gap-3 mb-5">
+          <input
+            type="number"
+            min="1" max="50"
+            value={tableCount}
+            onChange={(e) => { setTableCount(e.target.value); setGenerated(false); }}
+            placeholder="How many tables? (e.g. 8)"
+            className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none border"
+            style={{ borderColor: 'rgba(214,153,60,0.4)', color: '#1a1a1a', background: '#fafaf8' }}
+            onFocus={(e) => { e.target.style.borderColor = '#d6993c'; e.target.style.boxShadow = '0 0 0 3px rgba(214,153,60,0.15)'; }}
+            onBlur={(e)  => { e.target.style.borderColor = 'rgba(214,153,60,0.4)'; e.target.style.boxShadow = 'none'; }}
+          />
+          <button
+            onClick={() => { if (parseInt(tableCount) > 0) setGenerated(true); }}
+            className="px-5 py-2.5 rounded-xl text-sm font-black text-white transition-all active:scale-[0.98]"
+            style={{ background: 'linear-gradient(135deg,#325862,#243f47)', boxShadow: '0 4px 12px rgba(50,88,98,0.3)' }}
+          >
+            Generate
+          </button>
+        </div>
+
+        {/* QR Grid */}
+        {generated && parseInt(tableCount) > 0 && (
+          <>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {Array.from({ length: count }, (_, i) => i + 1).map((n) => (
+                <div key={n} className="flex flex-col items-center rounded-xl p-3 border"
+                  style={{ borderColor: 'rgba(214,153,60,0.2)', background: '#fafaf8' }}>
+                  <img
+                    src={qrUrl(n)}
+                    alt={`Table ${n}`}
+                    className="w-full aspect-square rounded-lg"
+                    style={{ maxWidth: 100 }}
+                  />
+                  <p className="font-black text-xs mt-2" style={{ color: '#325862' }}>Table {n}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Print all button */}
+            <button
+              onClick={handlePrint}
+              className="w-full py-3 rounded-xl text-sm font-black text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg,#982829,#d6993c)', boxShadow: '0 4px 16px rgba(152,40,41,0.3)' }}
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
+                <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+              </svg>
+              Print All {count} QR Codes
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -117,9 +235,10 @@ const AdminDashboard = () => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState(localStorage.getItem('velvet_vault_logo_url') || '');
 
-  const pollRef = useRef(null);
+  const pollRef          = useRef(null);
   const knownOrderIdsRef = useRef(null);   // null = first fetch not yet done
-  const titleFlashRef = useRef(null);
+  const titleFlashRef    = useRef(null);
+  const reminderRef      = useRef(null);   // 2-minute unprepared-order reminder
 
   // ── Auth check ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -173,7 +292,26 @@ const AdminDashboard = () => {
     } catch (_) { /* AudioContext blocked — silently ignore */ }
   }, []);
 
-  // ── Clear notifications (call when admin views orders) ───────────────────────
+  // ── Urgent reminder sound — faster, insistent pattern ───────────────────────
+  const playReminderSound = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      // Four short urgent pulses
+      [[660, 0, 0.12], [660, 0.16, 0.12], [660, 0.32, 0.12], [880, 0.48, 0.25]].forEach(([freq, start, dur]) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, ctx.currentTime + start);
+        gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + dur + 0.05);
+      });
+    } catch (_) {}
+  }, []);
   const clearNotifications = useCallback(() => {
     setUnreadCount(0);
     clearInterval(titleFlashRef.current);
@@ -313,6 +451,74 @@ const AdminDashboard = () => {
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
   }, [tab, clearNotifications]);
+
+  // ── 2-minute reminder for orders not yet marked "preparing" ──────────────────
+  useEffect(() => {
+    if (!authReady) return;
+
+    reminderRef.current = setInterval(() => {
+      // Use the latest orders via functional state read
+      setOrders((currentOrders) => {
+        const unprepared = currentOrders.filter(
+          (o) => o.status === 'pending' || o.status === 'accepted'
+        );
+
+        if (unprepared.length === 0) return currentOrders; // nothing to remind
+
+        // Play urgent sound
+        playReminderSound();
+
+        // Flash tab title
+        clearInterval(titleFlashRef.current);
+        let show = true;
+        titleFlashRef.current = setInterval(() => {
+          document.title = show ? `⚠️ ${unprepared.length} Order${unprepared.length > 1 ? 's' : ''} Waiting!` : 'Velvet Vault Admin';
+          show = !show;
+        }, 700);
+
+        // Show one grouped reminder toast
+        toast.custom(() => (
+          <div style={{
+            background: 'linear-gradient(135deg,#7c1d1d,#991b1b)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: '16px',
+            padding: '14px 16px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+            minWidth: '290px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+            fontFamily: 'Montserrat, sans-serif',
+          }}>
+            <span style={{ fontSize: '24px', lineHeight: 1 }}>⚠️</span>
+            <div>
+              <p style={{ color: '#fca5a5', fontWeight: 900, fontSize: '13px', margin: 0, letterSpacing: '0.04em' }}>
+                Reminder — {unprepared.length} Order{unprepared.length > 1 ? 's' : ''} Waiting!
+              </p>
+              {unprepared.slice(0, 3).map((o) => (
+                <p key={o._id} style={{ color: 'rgba(255,255,255,0.8)', fontSize: '11px', margin: '4px 0 0', fontWeight: 600 }}>
+                  {o.orderType === 'takeaway' ? '🥡 Takeaway' : `🪑 Table ${o.tableNumber}`}
+                  {' · '}{o.customerName}{' · '}
+                  <span style={{ color: '#fca5a5' }}>
+                    {o.status === 'pending' ? 'Not yet accepted' : 'Accepted — mark Preparing!'}
+                  </span>
+                </p>
+              ))}
+              {unprepared.length > 3 && (
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', margin: '4px 0 0' }}>
+                  +{unprepared.length - 3} more…
+                </p>
+              )}
+            </div>
+          </div>
+        ), { duration: 10000, position: 'top-right' });
+
+        return currentOrders; // no state change, just side-effects
+      });
+    }, 2 * 60 * 1000); // every 2 minutes
+
+    return () => clearInterval(reminderRef.current);
+  }, [authReady, playReminderSound]);
 
   // ── Order status update ───────────────────────────────────────────────────────
   const updateOrderStatus = async (id, status) => {
@@ -1021,6 +1227,9 @@ const AdminDashboard = () => {
 
             {/* ── Change Password ── */}
             <ChangePassword />
+
+            {/* ── Table QR Code Generator ── */}
+            <QRGenerator />
           </div>
         )}
       </main>
