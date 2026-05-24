@@ -85,10 +85,10 @@ const Modal = ({ onClose, children }) => (
 // ── Table QR Code Generator ───────────────────────────────────────────────────
 const QRGenerator = () => {
   const [tableCount, setTableCount] = React.useState('');
-  const [generated,  setGenerated]  = React.useState(false);
+  const [generated, setGenerated] = React.useState(false);
 
   const baseUrl = window.location.origin; // e.g. https://velvet-vault.netlify.app
-  const count   = Math.min(Math.max(parseInt(tableCount) || 0, 1), 50);
+  const count = Math.min(Math.max(parseInt(tableCount) || 0, 1), 50);
 
   const qrUrl = (n) =>
     `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(`${baseUrl}?table=${n}`)}`;
@@ -133,7 +133,7 @@ const QRGenerator = () => {
           <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{ background: 'linear-gradient(135deg,#325862,#243f47)' }}>
             <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
-              <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13 0h-2v2h2v-2zm0 4h-2v2h2v-2zm2-4h-2v2h2v-2zm0 4h-2v2h2v-2zm-4-8h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h-2v2h2v-2z"/>
+              <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13 0h-2v2h2v-2zm0 4h-2v2h2v-2zm2-4h-2v2h2v-2zm0 4h-2v2h2v-2zm-4-8h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h-2v2h2v-2z" />
             </svg>
           </div>
           <div>
@@ -153,7 +153,7 @@ const QRGenerator = () => {
             className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none border"
             style={{ borderColor: 'rgba(214,153,60,0.4)', color: '#1a1a1a', background: '#fafaf8' }}
             onFocus={(e) => { e.target.style.borderColor = '#d6993c'; e.target.style.boxShadow = '0 0 0 3px rgba(214,153,60,0.15)'; }}
-            onBlur={(e)  => { e.target.style.borderColor = 'rgba(214,153,60,0.4)'; e.target.style.boxShadow = 'none'; }}
+            onBlur={(e) => { e.target.style.borderColor = 'rgba(214,153,60,0.4)'; e.target.style.boxShadow = 'none'; }}
           />
           <button
             onClick={() => { if (parseInt(tableCount) > 0) setGenerated(true); }}
@@ -189,7 +189,7 @@ const QRGenerator = () => {
               style={{ background: 'linear-gradient(135deg,#982829,#d6993c)', boxShadow: '0 4px 16px rgba(152,40,41,0.3)' }}
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-                <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+                <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z" />
               </svg>
               Print All {count} QR Codes
             </button>
@@ -235,10 +235,10 @@ const AdminDashboard = () => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState(localStorage.getItem('velvet_vault_logo_url') || '');
 
-  const pollRef          = useRef(null);
+  const pollRef = useRef(null);
   const knownOrderIdsRef = useRef(null);   // null = first fetch not yet done
-  const titleFlashRef    = useRef(null);
-  const reminderRef      = useRef(null);   // 2-minute unprepared-order reminder
+  const titleFlashRef = useRef(null);
+  const reminderRef = useRef(null);   // 2-minute unprepared-order reminder
 
   // ── Auth check ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -298,7 +298,7 @@ const AdminDashboard = () => {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       // Four short urgent pulses
       [[660, 0, 0.12], [660, 0.16, 0.12], [660, 0.32, 0.12], [880, 0.48, 0.25]].forEach(([freq, start, dur]) => {
-        const osc  = ctx.createOscillator();
+        const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -310,7 +310,7 @@ const AdminDashboard = () => {
         osc.start(ctx.currentTime + start);
         osc.stop(ctx.currentTime + start + dur + 0.05);
       });
-    } catch (_) {}
+    } catch (_) { }
   }, []);
   const clearNotifications = useCallback(() => {
     setUnreadCount(0);
@@ -766,8 +766,11 @@ const AdminDashboard = () => {
       </div>
 
       {/* ── Tab Navigation ─────────────────────────────────────────────────── */}
-      <div className={`${C.card} sticky top-[60px] z-30 shadow-sm`} style={{ border: undefined }}>
-        <div className="max-w-4xl mx-auto px-4 flex">
+      <div
+        className={`${C.card} sticky top-[60px] z-30 shadow-sm`}
+        style={{ border: undefined }}
+      >
+        <div className="max-w-4xl mx-auto px-4 flex justify-between items-center gap-2">
           {[
             { id: 'orders', label: 'Orders', badge: pendingCount },
             { id: 'menu', label: 'Menu' },
@@ -775,16 +778,24 @@ const AdminDashboard = () => {
             { id: 'analytics', label: 'Analytics' },
             { id: 'settings', label: 'Settings' },
           ].map((t) => (
-            <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'orders') clearNotifications(); }}
-              className="flex-1 sm:flex-none sm:px-6 py-3.5 text-xs font-black uppercase tracking-widest border-b-2 transition-all relative"
+            <button
+              key={t.id}
+              onClick={() => {
+                setTab(t.id);
+                if (t.id === 'orders') clearNotifications();
+              }}
+              className="flex-1 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wide border-b-2 transition-all relative text-center"
               style={{
                 borderBottomColor: tab === t.id ? '#007B8B' : 'transparent',
                 color: tab === t.id ? '#007B8B' : '#9ca3af',
               }}
             >
               {t.label}
+
               {t.badge > 0 && (
-                <span className="ml-1.5 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">{t.badge}</span>
+                <span className="ml-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                  {t.badge}
+                </span>
               )}
             </button>
           ))}
