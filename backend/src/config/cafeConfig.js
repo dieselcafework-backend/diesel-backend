@@ -19,9 +19,9 @@ module.exports = {
   // Change these for each new café deployment
 
   cafe: {
-    name:           'Velvet Vault',
+    name:           'Clone Testing',
     type:           'Café',
-    vapidEmail:     'admin@velvetvault.com',   // used in web-push VAPID setup
+    vapidEmail:     'admin@clonetesting.com',   // used in web-push VAPID setup
   },
 
   // ── ② ADMIN CREDENTIALS ──────────────────────────────────────────
@@ -29,9 +29,9 @@ module.exports = {
   // After running createAdmin.js, change the password via the dashboard
 
   admin: {
-    email:    'admin@velvet-vault.com',
-    password: 'velvetpassword',               // change after first login!
-    name:     'Abhay'
+    email:    'admin@clonetesting.com',
+    password: 'clonepassword',                // change after first login!
+    name:     'Sahil'
   },
 
   // ── ③ ENVIRONMENT VARIABLES ──────────────────────────────────────
