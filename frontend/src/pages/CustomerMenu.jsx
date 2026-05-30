@@ -70,7 +70,7 @@ const MyOrdersPanel = ({ orders, onClose, onClear }) => {
         {/* Header */}
         <div
           className="flex items-center justify-between px-5 py-4 flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg, #D33244 0%, #982829 100%)' }}
+          style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%)' }}
         >
           <div className="flex items-center gap-2">
             <span className="text-xl">📦</span>
@@ -304,7 +304,6 @@ const CustomerMenu = () => {
         </div>
       )}
 
-      {/* ✅ STEP 2 — Wrap ALL your existing content in this */}
       {!shopClosed && (
         <> {/* Welcome modal — shows once per session */}
           <WelcomeModal tableNo={tableFromQR ? `Table ${tableFromQR}` : ''} />
@@ -339,12 +338,12 @@ const CustomerMenu = () => {
                   className="w-full rounded-full pl-10 pr-10 py-2.5 text-sm font-medium focus:outline-none transition-all"
                   style={{
                     background: 'white',
-                    border: '1.5px solid rgba(214,153,60,0.3)',
+                    border: '1.5px solid var(--primary)',
                     color: '#1a1a1a',
                     fontFamily: 'Poppins, sans-serif',
                   }}
-                  onFocus={(e) => { e.target.style.borderColor = '#325862'; e.target.style.boxShadow = '0 0 0 3px rgba(50,88,98,0.12)'; }}
-                  onBlur={(e) => { e.target.style.borderColor = 'rgba(214,153,60,0.3)'; e.target.style.boxShadow = 'none'; }}
+                  onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(173, 191, 196, 0.12)'; }}
+                  onBlur={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = 'none'; }}
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery('')}
@@ -375,8 +374,8 @@ const CustomerMenu = () => {
                         className="flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-250 flex items-center gap-1.5"
                         style={{
                           fontFamily: 'Poppins, sans-serif',
-                          background: active ? '#ffffff' : 'transparent',
-                          color: active ? '#1a1a1a' : 'rgba(255, 255, 255, 0.75)',
+                          background: active ? 'var(--pillsupActive)' : 'var(--pillsup)',
+                          color: active ? 'var(--pillsupActiveText)' : 'var(--pillsupText)',
                           boxShadow: active ? '0 2px 10px rgba(0, 0, 0, 0.45)' : 'none',
                           border: active ? 'none' : '1px solid #dbc5ae',
                         }}
@@ -398,7 +397,7 @@ const CustomerMenu = () => {
 
           {/* Sub Category Pills */}
           {!searchQuery && subs.length > 2 && (
-            <div className="sticky top-[178px] z-40" style={{ background: '#f87d7d', borderBottom: '1px solid rgba(214,153,60,0.15)' }}>
+            <div className="sticky top-[178px] z-40" style={{ background: 'var(--subbg)', borderBottom: '1px solid rgba(214,153,60,0.15)' }}>
               <div className="max-w-lg mx-auto">
                 <div className="flex overflow-x-auto no-scrollbar px-3 py-2 gap-1.5">
                   {subs.map((sub) => {
@@ -408,8 +407,8 @@ const CustomerMenu = () => {
                         className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-all duration-200"
                         style={{
                           fontFamily: 'Poppins, sans-serif',
-                          background: active ? 'var(--pill-active)' : '#ffffff',
-                          color: active ? 'var(--pill-active-text)' : '#4e2c21',
+                          background: active ? 'var(--pill-active)' : 'var(--pillsub)',
+                          color: active ? 'var(--pill-active-text)' : 'var(--pillsubText)',
                           borderColor: active ? '#dbc5ae' : 'rgba(229, 229, 229, 0.25)',
                         }}
                       >
@@ -448,12 +447,12 @@ const CustomerMenu = () => {
                   <div key={subCat}>
                     {/* Section header */}
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg,black,transparent)' }} />
+                      <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg,var(--textbodymainbg),transparent)' }} />
                       <h2 className="text-xs uppercase tracking-[0.25em] px-2 font-bold"
-                        style={{ fontFamily: 'Poppins,sans-serif', color: '#000000' }}>
+                        style={{ fontFamily: 'Poppins,sans-serif', color: 'var(--textbodymainbg)' }}>
                         {subCat}
                       </h2>
-                      <div className="h-px flex-1" style={{ background: 'linear-gradient(270deg,black,transparent)' }} />
+                      <div className="h-px flex-1" style={{ background: 'linear-gradient(270deg,var(--textbodymainbg),transparent)' }} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       {items.map((item) => <MenuCard key={item._id} item={item} />)}
@@ -469,9 +468,9 @@ const CustomerMenu = () => {
             <div className="fixed bottom-5 left-0 right-0 flex justify-center z-30 px-4">
               <button onClick={toggleCart}
                 className="text-white rounded-2xl py-3.5 px-5 flex items-center gap-3 active:scale-[0.98] transition-all max-w-sm w-full shadow-gold-lg"
-                style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--accent))', fontFamily: 'Poppins,sans-serif' }}>
+                style={{ background: 'linear-gradient(135deg, var(--confirmbuttonbg), var(--confirmbuttonbg))', fontFamily: 'Poppins,sans-serif' }}>
                 <div className="bg-white rounded-xl w-8 h-8 flex items-center justify-center font-black text-sm flex-shrink-0"
-                  style={{ color: '#982829' }}>
+                  style={{ color: 'var(--primary)' }}>
                   {totalItems}
                 </div>
                 <span className="font-bold tracking-widest text-sm uppercase flex-1 text-center">View Cart</span>

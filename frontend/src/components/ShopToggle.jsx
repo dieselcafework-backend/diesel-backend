@@ -16,6 +16,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import { cafeConfig } from '../config/cafeConfig';
 
 const ShopToggle = () => {
   const [isOpen,   setIsOpen]   = useState(true);
@@ -79,7 +80,7 @@ const ShopToggle = () => {
 
       {/* Label */}
       <span className="text-xs font-black tracking-wide whitespace-nowrap">
-        {loading ? 'UPDATING…' : isOpen ? 'SHOP OPEN' : 'SHOP CLOSED'}
+        {loading ? 'UPDATING…' : isOpen ? `${cafeConfig.type} OPEN` : `${cafeConfig.type} CLOSED`}
       </span>
     </button>
   );

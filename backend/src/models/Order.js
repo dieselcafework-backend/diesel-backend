@@ -49,9 +49,13 @@ const orderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ['upi', 'debit-card', 'credit-card', 'not_required'],
+      enum: ['upi', 'debit-card', 'credit-card', 'not_required', 'razorpay'],
       default: 'not_required',
     },
+
+    // ── Razorpay fields ──────────────────────────────────────────────────────
+    paymentId:       { type: String, default: '' },   // Razorpay payment ID
+    razorpayOrderId: { type: String, default: '' },   // Razorpay order ID
 
     pickupToken: { type: String, default: '' },
   },

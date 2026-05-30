@@ -40,10 +40,43 @@ const injectCSSVariables = () => {
   root.style.setProperty('--accent-dark', c.accentDark);
   root.style.setProperty('--pill-active', c.pillActive);
   root.style.setProperty('--pill-active-text', c.pillActiveText);
+  root.style.setProperty('--pillsub', c.pillsub);
+  root.style.setProperty('--pillsubText', c.pillsubText);
+  root.style.setProperty('--pillsup', c.pillsup);
+  root.style.setProperty('--pillsupText', c.pillsupText);
+  root.style.setProperty('--pillsupActive', c.pillsupActive);
+  root.style.setProperty('--pillsupActiveText', c.pillsupActiveText);
+  root.style.setProperty('--subbg', c.subbg);
+
+
+  // OrderModal & Cart
+  root.style.setProperty('--ordermodelbg', c.ordermodelbg);
+  root.style.setProperty('--ordermodelbgtext', c.ordermodelbgtext);
+  root.style.setProperty('--ordermodelbgtextonsummery', c.ordermodelbgtextonsummery);
+  root.style.setProperty('--canclebuttonbg', c.canclebuttonbg);
+  root.style.setProperty('--canclebuttonborder', c.canclebuttonborder);
+  root.style.setProperty('--ordermodelbgmesseges', c.ordermodelbgmesseges);
+  root.style.setProperty('--ordermodelinputbg', c.ordermodelinputbg);
+  root.style.setProperty('--ordermodelinputborder', c.ordermodelinputborder);
+  root.style.setProperty('--typeselectorbgactive', c.typeselectorbgactive);
+  root.style.setProperty('--typeselectorbg', c.typeselectorbg);
+  root.style.setProperty('--typeselectorborderactive', c.typeselectorborderactive);
+  root.style.setProperty('--typeselectorbgborderinactive', c.typeselectorborderinactive);
+  root.style.setProperty('--typeselectortextinactive', c.typeselectortextinactive);
+  root.style.setProperty('--typeselectortextactive', c.typeselectortextactive);
+  root.style.setProperty('--typeselectorshadowinactive', c.typeselectorshadowinactive);
+  root.style.setProperty('--cancelbuttonbg', c.cancelbuttonbg);
+  root.style.setProperty('--cancelbuttonborder', c.cancelbuttonborder);
+  root.style.setProperty('--confirmbuttonbg', c.confirmbuttonbg);
+
+
+
+
 
   // ── Text ───────────────────────────────────────────────────────────────────
   root.style.setProperty('--text-on-primary', c.textOnPrimary);
   root.style.setProperty('--text-body', c.textBody);
+  root.style.setProperty('--textbodymainbg', c.textbodymainbg);
   root.style.setProperty('--text-muted', c.textMuted);
   root.style.setProperty('--text-price', c.textPrice);
   root.style.setProperty('--text-desc', c.textDesc);

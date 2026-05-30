@@ -159,7 +159,7 @@ html { scroll-behavior: smooth; }
   background: #f6eee5; color: #000000;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-input::placeholder, textarea::placeholder { color: #4b2928; }
+input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .input-base:focus {
   outline: none;
   border-color: var(--primary-dark);

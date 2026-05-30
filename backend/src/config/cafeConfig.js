@@ -19,9 +19,9 @@ module.exports = {
   // Change these for each new café deployment
 
   cafe: {
-    name:           'Clone Testing',
-    type:           'Café',
-    vapidEmail:     'admin@clonetesting.com',   // used in web-push VAPID setup
+    name: 'Clone Testing',
+    type: 'Café',
+    vapidEmail: 'admin@clonetesting.com',   // used in web-push VAPID setup
   },
 
   // ── ② ADMIN CREDENTIALS ──────────────────────────────────────────
@@ -29,9 +29,9 @@ module.exports = {
   // After running createAdmin.js, change the password via the dashboard
 
   admin: {
-    email:    'admin@clonetesting.com',
+    email: 'admin@clonetesting.com',
     password: 'clonepassword',                // change after first login!
-    name:     'Sahil'
+    name: 'Sahil'
   },
 
   // ── ③ ENVIRONMENT VARIABLES ──────────────────────────────────────
@@ -40,14 +40,15 @@ module.exports = {
   // Never put actual secret values in this file.
 
   env: {
-    port:            process.env.PORT            || 5000,
-    mongoUri:        process.env.MONGODB_URI,
-    jwtSecret:       process.env.JWT_SECRET,
-    frontendUrl:     process.env.FRONTEND_URL,
-    vapidPublicKey:  process.env.VAPID_PUBLIC_KEY,
+    port: process.env.PORT || 5000,
+    mongoUri: process.env.MONGODB_URI,
+    jwtSecret: process.env.JWT_SECRET,
+    frontendUrl: process.env.FRONTEND_URL,
+    vapidPublicKey: process.env.VAPID_PUBLIC_KEY,
     vapidPrivateKey: process.env.VAPID_PRIVATE_KEY,
-    razorpayKeyId:   process.env.RAZORPAY_KEY_ID,
-    razorpaySecret:  process.env.RAZORPAY_KEY_SECRET,
-    nodeEnv:         process.env.NODE_ENV        || 'development',
+    razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+    razorpaySecret: process.env.RAZORPAY_KEY_SECRET,
+    razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET,  // ← NEW
+    nodeEnv: process.env.NODE_ENV || 'development',
   },
 };

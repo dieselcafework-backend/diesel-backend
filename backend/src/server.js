@@ -12,8 +12,6 @@ const menuRoutes = require("./routes/menu");
 const orderRoutes = require("./routes/orders");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const shopStatusRoutes = require("./routes/shopStatus");
-const pushRoutes = require("./routes/push");
-const cafeConfig = require('./config/cafeConfig');
 
 const app = express();
 
@@ -23,7 +21,7 @@ app.use(helmet());
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = [
-  'https://clonetesting.netlify.app',
+  'https://velvet-vault.netlify.app',
   'http://localhost:5173',
   'http://localhost:4173',
   'http://localhost:3000',
@@ -66,6 +64,8 @@ app.use("/api/auth/login", authLimiter);
 app.use("/api/menu", publicLimiter);
 
 // ── Body Parsing ──────────────────────────────────────────────────────────────
+// Raw body needed for Razorpay webhook signature verification — MUST be before express.json()
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use('/api/auth/logo', express.json({ limit: '5mb' }));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -82,7 +82,6 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/shop-status", shopStatusRoutes);
-app.use("/api/push", pushRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({
@@ -105,7 +104,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = cafeConfig.env.port;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Allowed CORS origins:`, ALLOWED_ORIGINS);

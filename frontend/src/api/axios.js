@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { cafeConfig } from '../config/cafeConfig';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -6,11 +7,9 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-const TOKEN_KEY = 'velvet_vault_admin_token';
-
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = localStorage.getItem(cafeConfig.admin.tokenKey);
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
@@ -21,7 +20,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(cafeConfig.admin.tokenKey);
     }
     return Promise.reject(error);
   }

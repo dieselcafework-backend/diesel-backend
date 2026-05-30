@@ -74,13 +74,17 @@ router.post('/', requireShopOpen, async (req, res) => {
 
     const isTakeaway = orderType === 'takeaway';
 
-    // Takeaway requires phone and UTR
+    // Takeaway requires phone always
     if (isTakeaway) {
       if (!phoneNumber || phoneNumber.trim().length < 10) {
         return res.status(400).json({ message: 'Valid phone number is required for takeaway.' });
       }
-      if (!utrNumber || utrNumber.trim().length < 6) {
-        return res.status(400).json({ message: 'UTR/Transaction ID is required for takeaway.' });
+      // UTR only required for manual UPI/card payments — NOT for Razorpay
+      const isRazorpay = paymentMethod === 'razorpay';
+      if (!isRazorpay) {
+        if (!utrNumber || utrNumber.trim().length < 6) {
+          return res.status(400).json({ message: 'UTR/Transaction ID is required for takeaway.' });
+        }
       }
     }
 
@@ -88,7 +92,7 @@ router.post('/', requireShopOpen, async (req, res) => {
     const pickupToken = isTakeaway ? await generatePickupToken() : '';
 
     // Validate paymentMethod — default to 'upi' for takeaway if not provided
-    const validMethods = ['upi', 'debit-card', 'credit-card'];
+    const validMethods = ['upi', 'debit-card', 'credit-card', 'razorpay'];
     const resolvedPaymentMethod = isTakeaway
       ? (validMethods.includes(paymentMethod) ? paymentMethod : 'upi')
       : 'not_required';

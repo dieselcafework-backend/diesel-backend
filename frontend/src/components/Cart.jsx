@@ -82,7 +82,7 @@ const Cart = ({ onCheckout }) => {
                     </button>
                   </div>
 
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-desc)', fontFamily: 'Poppins,sans-serif' }}>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--ordermodelbgtextonsummery)', fontFamily: 'Poppins,sans-serif' }}>
                     ₹{item.price} each
                   </p>
 
@@ -106,10 +106,10 @@ const Cart = ({ onCheckout }) => {
         {items.length > 0 && (
           <div className="px-5 py-4 space-y-3" style={{ background: 'white', borderTop: '1px solid rgba(214,153,60,0.2)' }}>
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-sm" style={{ color: 'var(--admin)', fontFamily: 'Poppins,sans-serif' }}>Subtotal</span>
+              <span className="font-semibold text-sm" style={{ color: 'var(--primary)', fontFamily: 'Poppins,sans-serif' }}>Subtotal</span>
               <span className="font-black text-lg" style={{ color: 'var(--text-price)', fontFamily: 'Poppins,sans-serif' }}>₹{totalAmount}</span>
             </div>
-            <button onClick={() => { closeCart(); onCheckout(); }} className="btn-gold w-full py-3.5 rounded-2xl text-sm tracking-widest uppercase">
+            <button onClick={() => { closeCart(); onCheckout(); }} className="btn w-full py-3.5 rounded-2xl text-sm tracking-widest uppercase" style={{ background: 'var(--confirmbuttonbg)', color: 'var(--ordermodelbgtext)' }}>
               Place Order →
             </button>
           </div>

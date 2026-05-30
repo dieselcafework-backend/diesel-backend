@@ -40,12 +40,13 @@ export const cafeConfig = {
   // ── ① IDENTITY ────────────────────────────────────────────────────────────
   // The café's public-facing name and personality.
 
-  name: 'Velvet Vault',               // Full name used in titles, toasts
-  nameLine1: 'Velvet',                     // Navbar logo — first line
-  nameLine2: 'Vault',                      // Navbar logo — second line
+  name: 'Clone Test',               // Full name used in titles, toasts
+  nameLine1: 'Clone',                     // Navbar logo — first line
+  nameLine2: 'Test',
+  adminname: 'Sahil',         // Admin panel name
   tagline: 'Where every sip tells a story',
   description: 'Experience premium taste & comfort',
-  type: 'Café',                       // 'Café' | 'Restaurant' | 'Bakery'
+  type: 'RESTAURANT',                       // 'Café' | 'Restaurant' | 'Bakery'
 
 
   // ── ② CONTACT & PAYMENT ───────────────────────────────────────────────────
@@ -55,21 +56,17 @@ export const cafeConfig = {
     phone: '9696028522',
     whatsapp: '919696028522',   // with country code, no + (for wa.me links)
     upiId: '9696028522@ybl',
-    upiName: 'Velvet Vault Café',
+    upiName: 'Clone Test Café',
   },
 
-  admin: {
-    email: 'admin@velvet-vault.com',   // used in createAdmin.js
-    emailPlaceholder: 'admin@velvetvault.com',    // shown in login form
-    tokenKey: 'velvet_vault_admin_token',
-  },
-
-
+  
+  
   // ── ③ ADMIN ───────────────────────────────────────────────────────────────
-
+  
   admin: {
-    emailPlaceholder: 'admin@velvetvault.com',    // Hint text on login form
-    tokenKey: 'velvet_vault_admin_token', // JWT key in localStorage
+    email: 'admin@clonetest.com',   // used in createAdmin.js
+    emailPlaceholder: 'admin@clonetest.com',    // shown in login form
+    tokenKey: 'clone_testing_admin_token',
   },
 
 
@@ -78,10 +75,10 @@ export const cafeConfig = {
   // different café systems, different keys prevent data collisions.
 
   storage: {
-    myOrders: 'velvet_vault_my_orders',
-    welcomeShown: 'velvet_vault_welcome_shown',
-    theme: 'velvet_vault_theme',
-    logo: 'velvet_vault_logo_url',
+    myOrders: 'clone_testing_my_orders',
+    welcomeShown: 'clone_testing_welcome_shown',
+    theme: 'clone_testing_theme',
+    logo: 'clone_testing_logo_url',
   },
 
 
@@ -118,9 +115,9 @@ export const cafeConfig = {
   colors: {
 
     // ── Customer UI ────────────────────────────────────────────────────────
-    primary: '#D33244',   // navbar bg, cart header, category bar
+    primary: '#3a1a1e',   // navbar bg, cart header, category bar
     primaryDark: '#982829',   // darker variant used in gradients/hover
-    primaryDeep: '#940901',   // add-to-cart button, quantity stepper bg
+    primaryDeep: '#3a1a1e',   // add-to-cart button, quantity stepper bg
 
     // Gold accent
     accent: '#d6993c',   // icons, borders, order badge
@@ -130,10 +127,39 @@ export const cafeConfig = {
     // Sub-category filter pills
     pillActive: '#4e2c21',   // active pill bg
     pillActiveText: '#ffffff',
+    pillsub: '#ffffff',   // active pill bg
+    pillsubText: '#000000',
+    subbg: '#3a1a1ec3',   // active pill bg
+
+    // Sup-category filter pills
+    pillsupActive: '#ffffff',   // active pill bg
+    pillsupActiveText: '#1a1a1a',
+    pillsup: '#ffffff00',   // active pill bg
+    pillsupText: '#ffffffc0',
+
+    // Order Model Colours
+    ordermodelbg: '#3a1a1e',
+    ordermodelbgtext: '#ffffff',
+    ordermodelbgtextonsummery: '#4a262b',
+    ordermodelbgmesseges: '#dcf309',
+    canclebuttonbg: '#ffffff',
+    canclebuttonborder: '#000000',
+    typeselectorbgactive: '#940901',
+    typeselectorbg: '#0000004d',
+    typeselectorborderactive: '#940901',
+    typeselectorborderinactive: '#0000008f',
+    typeselectortextactive: '#ffffff',
+    typeselectortextinactive: '#ffffff',
+    typeselectorshadowactive: '#93030273',
+    // cancelbuttonbg:'#0000004d',
+    // cancelbuttonborder: '#ffffff',
+    confirmbuttonbg: '#31603d',
+
 
     // Text
     textOnPrimary: '#ede8d0',   // text ON the red navbar / dark surfaces
     textBody: '#1a1a1a',   // main body text
+    textbodymainbg: '#f4eded',   // main body text
     textMuted: '#6b6b4a',   // secondary / muted text
     textPrice: '#31603d',   // price display (green)
     textDesc: '#64690c',   // item description (olive)

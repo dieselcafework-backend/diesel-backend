@@ -699,8 +699,8 @@ const AdminDashboard = () => {
               </div>
             )}
             <div>
-              <p className="font-black text-white text-sm tracking-widest">VELVET</p>
-              <p className="text-white/40 text-[10px]">Admin · Abhay</p>
+              <p className="font-black text-white text-sm tracking-widest">{cafeConfig.nameLine1}</p>
+              <p className="text-white/40 text-[10px]">Admin · {cafeConfig.adminname}</p>
             </div>
           </div>
 
@@ -1166,7 +1166,7 @@ const AdminDashboard = () => {
                     </svg>
                   </div>
                   <div>
-                    <h2 className={`font-black text-base ${C.text}`}>Café Logo</h2>
+                    <h2 className={`font-black text-base ${C.text}`}>{cafeConfig.type} Logo</h2>
                     <p className={`text-xs ${C.muted}`}>Displayed in navbar for all customers</p>
                   </div>
                 </div>
