@@ -40,13 +40,13 @@ export const cafeConfig = {
   // ── ① IDENTITY ────────────────────────────────────────────────────────────
   // The café's public-facing name and personality.
 
-  name: 'Clone Test',               // Full name used in titles, toasts
-  nameLine1: 'Clone',                     // Navbar logo — first line
-  nameLine2: 'Test',
-  adminname: 'Sahil',         // Admin panel name
+  name: 'Diesel Cafe',               // Full name used in titles, toasts
+  nameLine1: 'Diesel',                     // Navbar logo — first line
+  nameLine2: 'Cafe',
+  adminname: 'Niddhi',         // Admin panel name
   tagline: 'Where every sip tells a story',
   description: 'Experience premium taste & comfort',
-  type: 'RESTAURANT',                       // 'Café' | 'Restaurant' | 'Bakery'
+  type: 'CAFE',                       // 'Café' | 'Restaurant' | 'Bakery'
 
 
   // ── ② CONTACT & PAYMENT ───────────────────────────────────────────────────
@@ -56,7 +56,7 @@ export const cafeConfig = {
     phone: '9696028522',
     whatsapp: '919696028522',   // with country code, no + (for wa.me links)
     upiId: '9696028522@ybl',
-    upiName: 'Clone Test Café',
+    upiName: 'Diesel Café',
   },
 
   
@@ -64,9 +64,9 @@ export const cafeConfig = {
   // ── ③ ADMIN ───────────────────────────────────────────────────────────────
   
   admin: {
-    email: 'admin@clonetest.com',   // used in createAdmin.js
-    emailPlaceholder: 'admin@clonetest.com',    // shown in login form
-    tokenKey: 'clone_testing_admin_token',
+    email: 'admin@dieselcafe.com',   // used in createAdmin.js
+    emailPlaceholder: 'admin@cdieselcafe.com',    // shown in login form
+    tokenKey: 'diesel_cafe_admin_token',
   },
 
 
@@ -75,10 +75,10 @@ export const cafeConfig = {
   // different café systems, different keys prevent data collisions.
 
   storage: {
-    myOrders: 'clone_testing_my_orders',
-    welcomeShown: 'clone_testing_welcome_shown',
-    theme: 'clone_testing_theme',
-    logo: 'clone_testing_logo_url',
+    myOrders: 'diesel_cafe_my_orders',
+    welcomeShown: 'diesel_cafe_welcome_shown',
+    theme: 'diesel_cafe_theme',
+    logo: 'diesel_cafe_logo_url',
   },
 
 

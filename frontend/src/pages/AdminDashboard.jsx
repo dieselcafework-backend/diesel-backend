@@ -841,11 +841,11 @@ const AdminDashboard = () => {
             </div>
 
             {/* Order type filter row */}
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            <div className="flex gap-1.5 overflow-x-auto scrollbar pb-0.5">
               {[
-                { id: 'all', label: 'All Types' },
+                // { id: 'all', label: 'All Types' },
                 { id: 'dine-in', label: '🍽️ Dine In' },
-                { id: 'takeaway', label: '🛍️ Takeaway' },
+                // { id: 'takeaway', label: '🛍️ Takeaway' },
               ].map((t) => (
                 <button key={t.id} onClick={() => setOrderTypeFilter(t.id)}
                   className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"

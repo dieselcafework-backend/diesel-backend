@@ -5,8 +5,8 @@ import toast from 'react-hot-toast';
 import { saveMyOrder } from '../utils/myOrders';
 import { cafeConfig } from '../config/cafeConfig';
 
-// ── UPI config (kept for manual UPI fallback) ────────────────────────────────
-const CAFE_UPI_ID   = cafeConfig.contact.upiId;
+// ── UPI config from env vars ──────────────────────────────────────────────────
+const CAFE_UPI_ID = cafeConfig.contact.upiId;
 const CAFE_UPI_NAME = cafeConfig.contact.upiName;
 
 const buildUpiLink = (amount) =>
@@ -16,19 +16,6 @@ const buildQrUrl = (amount) => {
   const upiLink = buildUpiLink(amount);
   return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
 };
-
-// ── Razorpay — load script dynamically ───────────────────────────────────────
-const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
-
-const loadRazorpayScript = () =>
-  new Promise((resolve) => {
-    if (window.Razorpay) return resolve(true);
-    const s  = document.createElement('script');
-    s.src    = 'https://checkout.razorpay.com/v1/checkout.js';
-    s.onload = () => resolve(true);
-    s.onerror = () => resolve(false);
-    document.body.appendChild(s);
-  });
 
 // ── Payment method config ─────────────────────────────────────────────────────
 const PAYMENT_METHODS = [
@@ -187,97 +174,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
     setStep('payment');
   };
 
-  // ── Step 2: Razorpay payment → auto-verify → save order ─────────────────────
-  const handleRazorpayPayment = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      // 1. Create Razorpay order on backend
-      const { data: rzpOrder } = await api.post('/payments/create-order', { amount: totalAmount });
-
-      // 2. Load Razorpay checkout script
-      const loaded = await loadRazorpayScript();
-      if (!loaded) throw new Error('Razorpay failed to load. Check your connection.');
-
-      // 3. Open Razorpay checkout modal
-      const options = {
-        key:         RAZORPAY_KEY,
-        amount:      rzpOrder.amount,
-        currency:    'INR',
-        name:        cafeConfig.name,
-        description: 'Takeaway Order',
-        order_id:    rzpOrder.id,
-        prefill:     { name: name.trim(), contact: phone.trim() },
-        theme:       { color: cafeConfig.colors.primary },
-
-        // 4. On payment success — verify + save order
-        handler: async (response) => {
-          try {
-            const { data } = await api.post('/payments/verify', {
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id:   response.razorpay_order_id,
-              razorpay_signature:  response.razorpay_signature,
-              orderData: {
-                customerName: name.trim(),
-                phoneNumber:  phone.trim(),
-                note:         note.trim(),
-                items: items.map((i) => ({
-                  menuItem:     i._id,
-                  name:         i.name,
-                  price:        i.price,
-                  quantity:     i.quantity,
-                  veg:          i.veg,
-                  selectedSize: i.selectedSize || '',
-                })),
-              },
-            });
-
-            // Save to My Orders before clearing cart
-            saveMyOrder({
-              orderId:      data.order._id,
-              customerName: name.trim(),
-              tableNumber:  'Takeaway',
-              orderType:    'takeaway',
-              items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, veg: i.veg })),
-              totalAmount,
-              pickupToken:  data.order.pickupToken || '',
-              placedAt:     new Date().toISOString(),
-              note:         note.trim(),
-            });
-
-            setSavedTotal(totalAmount);
-            setSavedOrderType('takeaway');
-            setPickupToken(data.order.pickupToken);
-            setPaymentStatus('paid');
-            setOrderId(data.order._id);
-            setStep('success');
-            clearCart();
-            toast.success(`Order placed! Pickup: ${data.order.pickupToken}`, { icon: '🛍️', duration: 5000 });
-          } catch (verifyErr) {
-            toast.error('Payment done but order failed. Please contact us with your payment ID.');
-            console.error('[Razorpay verify]', verifyErr);
-          } finally {
-            setLoading(false);
-          }
-        },
-
-        modal: {
-          ondismiss: () => {
-            setLoading(false);
-            toast('Payment cancelled.', { icon: '❌' });
-          },
-        },
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (err) {
-      setLoading(false);
-      setError(err.message || 'Failed to start payment. Try again.');
-    }
-  };
-
-  // ── Step 2 (fallback): manual UTR submit — kept for non-Razorpay payments ──
+  // ── Step 2: customer enters transaction ID → submit order ─────────────────
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     setUtrError('');
@@ -287,13 +184,13 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
     setSubmitLoading(true);
     try {
       const res = await api.post('/orders', {
-        customerName:  name.trim(),
-        phoneNumber:   phone.trim(),
-        tableNumber:   'Takeaway',
-        orderType:     'takeaway',
-        note:          note.trim(),
-        utrNumber:     utr.trim(),
-        paymentMethod: paymentMethod,
+        customerName: name.trim(),
+        phoneNumber: phone.trim(),
+        tableNumber: 'Takeaway',
+        orderType: 'takeaway',
+        note: note.trim(),
+        utrNumber: utr.trim(),
+        paymentMethod: paymentMethod, // ← SEND payment method to backend
         items: items.map((i) => ({ menuItem: i._id, name: i.name, price: i.price, quantity: i.quantity, veg: i.veg })),
       });
       setSavedTotal(totalAmount);
@@ -302,16 +199,17 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
       setPaymentStatus(res.data.paymentStatus);
       setOrderId(res.data._id);
       setStep('success');
+      // ── Save to My Orders (localStorage) before cart is cleared ────────
       saveMyOrder({
-        orderId:      res.data._id,
+        orderId: res.data._id,
         customerName: name.trim(),
-        tableNumber:  'Takeaway',
-        orderType:    'takeaway',
+        tableNumber: 'Takeaway',
+        orderType: 'takeaway',
         items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, veg: i.veg })),
         totalAmount,
-        pickupToken:  res.data.pickupToken || '',
-        placedAt:     new Date().toISOString(),
-        note:         note.trim(),
+        pickupToken: res.data.pickupToken || '',
+        placedAt: new Date().toISOString(),
+        note: note.trim(),
       });
       clearCart();
       toast.success(`Order placed! Pickup: ${res.data.pickupToken}`, { icon: '🛍️', duration: 5000 });
@@ -489,7 +387,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
           {/* ══ STEP 2: PAYMENT ══════════════════════════════════════ */}
           {step === 'payment' && (
             <div className="px-6 py-5">
-              {/* Header */}
+              {/* Header — title changes with selected method */}
               <div className="flex items-center gap-3 mb-4">
                 <button onClick={() => setStep('form')}
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
@@ -498,108 +396,156 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                 </button>
                 <div>
                   <h2 className="font-black text-lg" style={{ color: 'var(--ordermodelbgtext)' }}>
-                    Complete Payment
+                    {getPaymentTitle(paymentMethod)}
                   </h2>
-                  <p className="text-white/70 text-xs">Secure payment powered by Razorpay</p>
+                  <p className="text-white/70 text-xs">Complete payment to place order</p>
                 </div>
               </div>
 
               {/* Amount badge */}
-              <div className="text-center mb-5 py-4 rounded-2xl"
+              <div className="text-center mb-4 py-3 rounded-2xl"
                 style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.15)' }}>
                 <p className="text-white/60 text-xs uppercase tracking-widest mb-1">Amount to Pay</p>
                 <p className="text-white font-black text-4xl">₹{totalAmount}</p>
-                <p className="text-white/50 text-xs mt-1">{items.length} item{items.length !== 1 ? 's' : ''} · Takeaway</p>
               </div>
 
-              {/* Error */}
-              {error && (
-                <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 text-sm font-medium">
-                  ⚠️ {error}
+              {/* ── NEW: Payment Method Selector ─────────────────────────── */}
+              <div className="mb-4">
+                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ordermodelbgtext)' }}>
+                  Select Payment Method
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {PAYMENT_METHODS.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setPaymentMethod(m.id)}
+                      className="flex flex-col items-center justify-center py-3 px-2 rounded-xl text-xs font-bold border-2 transition-all duration-200 active:scale-[0.97] text-center"
+                      style={{
+                        background: paymentMethod === m.id ? 'var(--typeselectorbgactive)' : 'rgba(255,255,255,0.12)',
+                        borderColor: paymentMethod === m.id ? 'var(--typeselectorborderactive)' : 'rgba(255,255,255,0.25)',
+                        color: 'white',
+                        boxShadow: paymentMethod === m.id ? '0 4px 12px var(--typeselectorbgactive)' : 'none',
+                      }}
+                    >
+                      <span className="text-base mb-1 leading-none">
+                        {m.id === 'upi' ? '📱' : '💳'}
+                      </span>
+                      <span className="leading-tight">
+                        {m.id === 'upi' ? 'UPI' : m.id === 'debit-card' ? 'Debit' : 'Credit'}
+                      </span>
+                    </button>
+                  ))}
                 </div>
-              )}
-
-              {/* ── Primary: Pay with Razorpay ─────────────────────────────── */}
-              <button
-                onClick={handleRazorpayPayment}
-                disabled={loading}
-                className="w-full py-4 rounded-2xl font-black text-sm text-white tracking-wide uppercase disabled:opacity-50 transition-all active:scale-[0.98] mb-3"
-                style={{ background: 'linear-gradient(135deg, #528FF0, #3355CC)', boxShadow: '0 4px 16px rgba(83,143,240,0.4)' }}>
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin inline-block" />
-                    Opening Payment…
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                    Pay ₹{totalAmount} — UPI / Card / NetBanking
-                  </span>
-                )}
-              </button>
-
-              {/* Supported payment icons */}
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <span className="text-[10px] text-white/40 uppercase tracking-wider">Powered by</span>
-                <span className="text-xs font-black text-white/60">Razorpay</span>
-                <span className="text-white/20">·</span>
-                <span className="text-[10px] text-white/40">GPay · PhonePe · Paytm · Cards</span>
+                <p className="text-[10px] mt-1.5 text-center" style={{ color: 'var(--ordermodelbgmesseges)' }}>
+                  {PAYMENT_METHODS.find(m => m.id === paymentMethod)?.sub}
+                </p>
               </div>
 
-              {/* Divider */}
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.15)' }} />
-                <p className="text-[10px] font-semibold text-white/30 uppercase tracking-widest">or pay manually</p>
-                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.15)' }} />
-              </div>
+              {/* QR Code + UPI ID — only shown when UPI is selected */}
+              {paymentMethod === 'upi' && (
+                <>
+                  <div className="bg-white rounded-2xl p-4 text-center mb-4">
+                    <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-3">
+                      Scan with any UPI app
+                    </p>
+                    <img
+                      src={buildQrUrl(totalAmount)}
+                      alt="UPI QR Code"
+                      className="w-44 h-44 mx-auto rounded-xl"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                    <p className="text-gray-400 text-xs mt-2">GPay · PhonePe · Paytm · BHIM · Any UPI app</p>
 
-              {/* ── Fallback: manual UPI (collapsed) ─────────────────────── */}
-              <details className="mb-2">
-                <summary className="cursor-pointer text-xs font-bold text-white/50 hover:text-white/70 transition-colors list-none text-center py-1">
-                  📱 Pay manually via UPI instead ›
-                </summary>
-                <div className="mt-3 space-y-3">
-                  <div className="bg-white rounded-2xl p-4 text-center">
-                    <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-3">Scan QR Code</p>
-                    <img src={buildQrUrl(totalAmount)} alt="UPI QR Code" className="w-40 h-40 mx-auto rounded-xl"
-                      onError={(e) => { e.target.style.display = 'none'; }} />
-                    <p className="text-gray-400 text-xs mt-2">GPay · PhonePe · Paytm · Any UPI app</p>
-                    <div className="mt-3 py-2 px-3 rounded-xl flex items-center justify-between gap-2"
-                      style={{ background: 'var(--order-card-bg)', border: '1px solid #e0cdb8' }}>
+                    {/* UPI ID */}
+                    <div className="mt-3 py-2 px-4 rounded-xl flex items-center justify-between gap-2"
+                      style={{ background: '#f6f0e8', border: '1px solid #e0cdb8' }}>
                       <div className="text-left">
                         <p className="text-gray-400 text-[10px] uppercase tracking-wider">UPI ID</p>
-                        <p className="text-gray-800 font-black text-xs">{CAFE_UPI_ID}</p>
+                        <p className="text-gray-800 font-black text-sm">{CAFE_UPI_ID}</p>
                       </div>
-                      <button onClick={() => { navigator.clipboard?.writeText(CAFE_UPI_ID); toast.success('Copied!'); }}
-                        className="text-xs font-bold px-2 py-1 rounded-lg text-white"
-                        style={{ background: 'var(--typeselectorbgactive)' }}>Copy</button>
+                      <button
+                        onClick={() => { navigator.clipboard?.writeText(CAFE_UPI_ID); toast.success('UPI ID copied!'); }}
+                        className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+                        style={{ background: 'var(--typeselectorbgactive)', color: 'white' }}>
+                        Copy
+                      </button>
                     </div>
                   </div>
 
+                  {/* Open UPI App button */}
                   <a href={buildUpiLink(totalAmount)}
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-bold text-sm transition-all active:scale-[0.98] text-white no-underline"
-                    style={{ background: 'var(--confirmbuttonbg)' }}>
-                    📱 Open UPI App
+                    className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-black text-sm mb-4 transition-all active:scale-[0.98]"
+                    style={{ background: 'var(--confirmbuttonbg)', color: 'var(--ordermodelbgtext)',textDecoration: 'none' }}>
+                    📱 Open UPI App to Pay
                   </a>
+                </>
+              )}
 
-                  <form onSubmit={handlePaymentSubmit} className="space-y-2">
-                    <label className="block font-bold text-xs text-white/70">
-                      UTR / Transaction ID after paying *
-                    </label>
-                    <input type="text" value={utr}
-                      onChange={(e) => setUtr(e.target.value.replace(/\s/g, ''))}
-                      placeholder="e.g. 425012345678" className="input-base" maxLength={30} inputMode="text" />
-                    {utrError && (
-                      <p className="text-red-400 text-xs font-medium">⚠️ {utrError}</p>
-                    )}
-                    <button type="submit" disabled={submitLoading}
-                      className="w-full py-3 rounded-2xl font-black text-xs text-white uppercase disabled:opacity-40 active:scale-[0.98]"
-                      style={{ background: 'var(--confirmbuttonbg)' }}>
-                      {submitLoading ? 'Submitting…' : "I've Paid — Place Order"}
-                    </button>
-                  </form>
+              {/* Info message for card payments */}
+              {paymentMethod !== 'upi' && (
+                <div className="mb-4 px-4 py-3 rounded-2xl text-sm"
+                  style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                  <p className="text-white font-bold mb-1">
+                    {paymentMethod === 'debit-card' ? '💳 Pay via Debit Card' : '💳 Pay via Credit Card'}
+                  </p>
+                  <p className="text-white/60 text-xs leading-relaxed">
+                    Complete your payment using your {paymentMethod === 'debit-card' ? 'debit' : 'credit'} card at the counter or via your bank app. Note the transaction reference number shown after payment.
+                  </p>
                 </div>
-              </details>
+              )}
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.2)' }} />
+                <p className="text-xs font-semibold whitespace-nowrap" style={{ color: 'var(--ordermodelbgmesseges)' }}>
+                  {paymentMethod === 'upi' ? 'After paying, enter UTR below' : 'Enter transaction reference below'}
+                </p>
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.2)' }} />
+              </div>
+
+              {/* Transaction ID form — label changes based on method */}
+              <form onSubmit={handlePaymentSubmit} className="space-y-3 pb-4">
+                <div>
+                  <label className="block font-bold text-sm mb-1 text-gray-100">
+                    {getUtrLabel(paymentMethod)}
+                  </label>
+                  <input
+                    type="text"
+                    value={utr}
+                    onChange={(e) => setUtr(e.target.value.replace(/\s/g, ''))}
+                    placeholder={getUtrPlaceholder(paymentMethod)}
+                    className="input-base"
+                    maxLength={30}
+                    inputMode="text"
+                  />
+                  <p className="text-xs mt-1" style={{ color: 'var(--ordermodelbgmesseges)' }}>
+                    {paymentMethod === 'upi'
+                      ? 'Find UTR in your UPI app under payment history'
+                      : 'Find this in your bank SMS or transaction receipt'}
+                  </p>
+                </div>
+
+                {utrError && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 text-sm font-medium">
+                    ⚠️ {utrError}
+                  </div>
+                )}
+
+                <button type="submit" disabled={submitLoading}
+                  className="w-full py-3.5 rounded-2xl font-black text-sm text-white tracking-widest uppercase disabled:opacity-40 transition-all active:scale-[0.98]"
+                  style={{ background: 'var(--confirmbuttonbg)' }}>
+                  {submitLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin inline-block" />
+                      Submitting…
+                    </span>
+                  ) : "I've Paid — Place Order"}
+                </button>
+
+                <p className="text-center text-white text-xs">
+                  Your order will be confirmed after payment verification
+                </p>
+              </form>
             </div>
           )}
 

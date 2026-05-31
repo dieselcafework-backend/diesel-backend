@@ -21,7 +21,7 @@ app.use(helmet());
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = [
-  'https://velvet-vault.netlify.app',
+  'https://dieselcafe.netlify.app',
   'http://localhost:5173',
   'http://localhost:4173',
   'http://localhost:3000',

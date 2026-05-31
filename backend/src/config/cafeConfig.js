@@ -29,8 +29,8 @@ module.exports = {
   // After running createAdmin.js, change the password via the dashboard
 
   admin: {
-    email: 'admin@clonetesting.com',
-    password: 'clonepassword',                // change after first login!
+    email: 'admin@dieselcafe.com',
+    password: 'dieselcafepassword',                // change after first login!
     name: 'Sahil'
   },
 
