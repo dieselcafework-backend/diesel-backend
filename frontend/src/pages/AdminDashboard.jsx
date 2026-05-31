@@ -7,7 +7,7 @@ import { usePushNotifications } from '../hooks/usePushNotifications';
 import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
 import ChangePassword from '../components/ChangePassword';
-import ShopToggle from '../components/ShopToggle';
+import ShopToggle, { TakeawayToggle, AutoPayToggle } from '../components/ShopToggle';
 import SalesAnalytics from '../components/SalesAnalytics';
 import AnalyticsPanel from '../components/AnalyticsPanel';
 // ── WhatsApp helpers ───────────────────────────────────────────────────────────
@@ -1106,7 +1106,32 @@ const AdminDashboard = () => {
         {/* ══ SETTINGS TAB ═══════════════════════════════════════════════════ */}
         {tab === 'settings' && (
           <div className="space-y-5">
-            <ShopToggle />
+
+            {/* ── Operational Controls — all 3 toggles ── */}
+            <div className={`${C.card} rounded-2xl shadow-sm overflow-hidden`}>
+              <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, var(--admin), var(--accent), #528FF0)' }} />
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-1">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" style={{ fill: 'var(--admin-accent)' }}>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                  </svg>
+                  <h2 className={`font-black text-base ${C.text}`}>Operational Controls</h2>
+                </div>
+                <p className={`text-xs ${C.muted} mb-4`}>
+                  Changes take effect instantly for all customers
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <ShopToggle />
+                  <TakeawayToggle />
+                  <AutoPayToggle />
+                </div>
+                <div className="mt-3 pt-3 space-y-1" style={{ borderTop: '1px solid var(--admin-border)' }}>
+                  <p className={`text-[11px] ${C.muted}`}>🏪 <strong>Shop</strong> — opens or closes all ordering for customers</p>
+                  <p className={`text-[11px] ${C.muted}`}>🥡 <strong>Takeaway</strong> — hides takeaway option from customer menu</p>
+                  <p className={`text-[11px] ${C.muted}`}>⚡ <strong>Auto Pay</strong> — Razorpay checkout (ON) vs manual UPI + UTR (OFF)</p>
+                </div>
+              </div>
+            </div>
 
             {/* ── Push Notifications ── */}
             {pushSupported && (
