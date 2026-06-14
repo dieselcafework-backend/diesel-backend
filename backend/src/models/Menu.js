@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
+const { superCategories } = require('../config/cafeConfig');
 
 const menuItemSchema = new mongoose.Schema(
   {
     superCategory: {
       type: String,
       required: true,
-      enum: ['Chinese', 'Snacks', 'Pasta & Maggie', 'Beverages', 'Combos', 'All Items'],
+      enum: superCategories,
     },
     subCategory: {
       type: String,
