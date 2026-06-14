@@ -7,6 +7,18 @@ const PushSubscription = require('../models/PushSubscription');
 
 const router = express.Router();
 
+// ── Write limiter — POST /orders only (customer order creation) ───────────────
+// Applied here at router level so it only affects POST, not admin GET polling.
+// 120 req/15 min = enough for a busy café without being exploitable.
+const { rateLimit } = require('express-rate-limit');
+const orderWriteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 120,
+  message: { message: 'Too many orders placed. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // ── VAPID setup ───────────────────────────────────────────────────────────────
 const cafeConfig = require('../config/cafeConfig');
 
@@ -60,7 +72,7 @@ const generatePickupToken = async () => {
 };
 
 // ── POST /orders — public ─────────────────────────────────────────────────────
-router.post('/', requireShopOpen, async (req, res) => {
+router.post('/', orderWriteLimiter, requireShopOpen, async (req, res) => {
   try {
     const {
       customerName, tableNumber, items, note,
@@ -161,6 +173,56 @@ router.get('/track/:id', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: 'Failed to track order.' });
+  }
+});
+
+// ── GET /orders/history — admin only ─────────────────────────────────────────
+// Query params: from=YYYY-MM-DD&to=YYYY-MM-DD&orderType=dine-in|takeaway&status=...
+router.get('/history', protect, async (req, res) => {
+  try {
+    const { from, to, status, orderType } = req.query;
+
+    if (!from || !to) {
+      return res.status(400).json({ message: '`from` and `to` date params are required.' });
+    }
+
+    const start = new Date(from); start.setHours(0, 0, 0, 0);
+    const end   = new Date(to);   end.setHours(23, 59, 59, 999);
+
+    if (isNaN(start) || isNaN(end)) {
+      return res.status(400).json({ message: 'Invalid date format. Use YYYY-MM-DD.' });
+    }
+    if (start > end) {
+      return res.status(400).json({ message: '`from` must be before or equal to `to`.' });
+    }
+
+    const filter = { createdAt: { $gte: start, $lte: end } };
+    if (status) filter.status = status;
+    if (orderType && ['dine-in', 'takeaway'].includes(orderType)) {
+      filter.orderType = orderType;
+    }
+
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
+
+    // Summary stats for the range
+    const nonCancelled  = orders.filter(o => o.status !== 'cancelled');
+    const totalRevenue  = nonCancelled.reduce((sum, o) => sum + o.totalAmount, 0);
+    const takeawayRevenue = nonCancelled
+      .filter(o => o.orderType === 'takeaway')
+      .reduce((sum, o) => sum + o.totalAmount, 0);
+
+    res.json({
+      from,
+      to,
+      totalOrders: orders.length,
+      totalRevenue,
+      takeawayRevenue,
+      dineInRevenue: totalRevenue - takeawayRevenue,
+      orders,
+    });
+  } catch (err) {
+    console.error('Order history error:', err);
+    res.status(500).json({ message: 'Failed to fetch order history.' });
   }
 });
 

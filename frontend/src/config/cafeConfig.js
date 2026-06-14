@@ -40,10 +40,10 @@ export const cafeConfig = {
   // ── ① IDENTITY ────────────────────────────────────────────────────────────
   // The café's public-facing name and personality.
 
-  name: 'Velvet Vault',               // Full name used in titles, toasts
-  nameLine1: 'Velvet',                     // Navbar logo — first line
-  nameLine2: 'Vault',
-  adminname: 'Abhay',         // Admin panel name
+  name: 'Diesel Cafe',               // Full name used in titles, toasts
+  nameLine1: 'Diesel',                     // Navbar logo — first line
+  nameLine2: 'cafe',
+  adminname: 'Nidhi',         // Admin panel name
   tagline: 'Where every sip tells a story',
   description: 'Experience premium taste & comfort',
   type: 'CAFE',                       // 'Café' | 'Restaurant' | 'Bakery'
@@ -53,10 +53,10 @@ export const cafeConfig = {
   // Shown to customers during the takeaway checkout UPI flow.
 
   contact: {
-    phone: '6388933194',    // for display in UPI payment flow (with country code, no +)
-    whatsapp: '6388933194',   // with country code, no + (for wa.me links)
-    upiId: 'BHARATPE2N0E0T1S4X94362@UNITYPE',
-    upiName: 'Velvet Vault',
+    phone: '9696028522',    // for display in UPI payment flow (with country code, no +)
+    whatsapp: '9696028522',   // with country code, no + (for wa.me links)
+    upiId: '969608522@ybl',
+    upiName: 'Diesel cafe',
   },
 
   
@@ -64,9 +64,9 @@ export const cafeConfig = {
   // ── ③ ADMIN ───────────────────────────────────────────────────────────────
   
   admin: {
-    email: 'admin@velvetvault.com',   // used in createAdmin.js
-    emailPlaceholder: 'admin@velvetvault.com',    // shown in login form
-    tokenKey: 'velvet_vault_admin_token',
+    email: 'admin@dieselcafe.com',   // used in createAdmin.js
+    emailPlaceholder: 'admin@Dieselcafe.com',    // shown in login form
+    tokenKey: 'Diesel_cafe_admin_token',
   },
 
 
@@ -88,12 +88,12 @@ export const cafeConfig = {
 
   superCategories: [
     'All Items',
-    'Chinese',
+    'Meals',
     'Snacks',
-    'Pasta & Maggie',
-    'Noodles',
+    'Salad & Soup',
+    // 'Noodles',
     'Beverages',
-    'Combos',
+    // 'Combos',
   ],
 
 

@@ -1,6 +1,6 @@
 /*
+  Content-Security-Policy: default-src 'none'; script-src 'self' https://checkout.razorpay.com https://cdn.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://diesel-backend-zl8a.onrender.com https://api.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
   X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Cross-Origin-Resource-Policy: same-site

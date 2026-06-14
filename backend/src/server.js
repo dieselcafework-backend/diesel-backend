@@ -103,14 +103,17 @@ app.set('trust proxy', 1);
 
 // ── Rate Limiters ─────────────────────────────────────────────────────────────
 //
-// Three tiers:
-//   globalLimiter  — catch-all safety net on every /api route (1000 req/15 min)
-//   publicLimiter  — menu browsing; unauthenticated, high-volume (300 req/15 min)
+// Tiers:
+//   globalLimiter  — catch-all on every /api route (1000 req/15 min)
 //   authLimiter    — login brute-force protection (10 req/15 min)
-//   writeLimiter   — order creation, coupon apply, expense submit (60 req/15 min)
+//   publicLimiter  — unauthenticated menu browsing (300 req/15 min)
+//   adminLimiter   — admin polling routes (orders, expenses, analytics, coupons)
+//                    dashboard polls /api/orders every few seconds via setInterval,
+//                    so this needs headroom: 900 req/15 min (~1 req/sec sustained)
 //
-// Order matters: specific limiters below override the global for their routes
-// because express-rate-limit tracks each middleware instance separately.
+// writeLimiter is intentionally removed from prefix-level middleware.
+// To rate-limit only POST /orders (customer order creation) without affecting
+// the admin GET polling, add router.use() inside routes/orders.js instead.
 
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -136,9 +139,9 @@ const publicLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-const writeLimiter = rateLimit({
+const adminLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 60,
+  max: 900,
   message: { message: "Too many requests. Please slow down." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -147,9 +150,10 @@ const writeLimiter = rateLimit({
 app.use("/api", globalLimiter);
 app.use("/api/auth/login", authLimiter);
 app.use("/api/menu", publicLimiter);
-app.use("/api/orders", writeLimiter);
-app.use("/api/coupons", writeLimiter);
-app.use("/api/expenses", writeLimiter);
+app.use("/api/orders", adminLimiter);
+app.use("/api/expenses", adminLimiter);
+app.use("/api/analytics", adminLimiter);
+app.use("/api/coupons", adminLimiter);
 
 // ── Body Parsing ──────────────────────────────────────────────────────────────
 //

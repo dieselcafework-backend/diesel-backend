@@ -4,6 +4,7 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { saveMyOrder } from '../utils/myOrders';
 import { cafeConfig } from '../config/cafeConfig';
+import CouponInput from './CouponInput';
 
 // ── UPI config from env vars ──────────────────────────────────────────────────
 const CAFE_UPI_ID = cafeConfig.contact.upiId;
@@ -68,6 +69,10 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
 
   // ── NEW: payment method state ─────────────────────────────────────────────
   const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'debit-card' | 'credit-card'
+
+  // ── Coupon state ────────────────────────────────────────────────
+  // appliedCoupon: { code, discountAmount, finalAmount } | null
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
 
   // ── Operational settings from backend ────────────────────────────────────
   const [isTakeawayEnabled, setIsTakeawayEnabled] = useState(true);
@@ -135,6 +140,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
     setOrderId(null); setOrderStatus('pending'); setPickupToken('');
     setPaymentStatus('not_required');
     setPaymentMethod('upi'); // ← RESET payment method
+    setAppliedCoupon(null); // ← RESET coupon
     prevStatusRef.current = 'pending';
     clearInterval(pollRef.current);
     onClose();
@@ -145,7 +151,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
     e.preventDefault();
     setError('');
     if (!name.trim()) return setError('Please enter your name.');
-    if (orderType === 'dine-in' && !table.trim()) return setError('Please enter your table number.');
+    // if (orderType === 'dine-in' && !table.trim()) return setError('Please enter your table number.');
     if (orderType === 'takeaway') {
       if (!phone.trim()) return setError('Please enter your mobile number.');
       if (!/^[6-9]\d{9}$/.test(phone.trim())) return setError('Enter a valid 10-digit mobile number.');
@@ -157,12 +163,13 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
       try {
         const res = await api.post('/orders', {
           customerName: name.trim(),
-          tableNumber: table.trim(),
+          tableNumber: 'N/A',
           orderType: 'dine-in',
           note: note.trim(),
           items: items.map((i) => ({ menuItem: i._id, name: i.name, price: i.price, quantity: i.quantity, veg: i.veg })),
+          couponCode: appliedCoupon?.code || '', // ← NEW
         });
-        setSavedTotal(totalAmount);
+        setSavedTotal(appliedCoupon?.finalAmount ?? totalAmount); // ← show discounted total
         setSavedOrderType('dine-in');
         setOrderId(res.data._id);
         setStep('success');
@@ -170,7 +177,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
         saveMyOrder({
           orderId: res.data._id,
           customerName: name.trim(),
-          tableNumber: table.trim(),
+          tableNumber: 'N/A',
           orderType: 'dine-in',
           items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, veg: i.veg })),
           totalAmount,
@@ -206,10 +213,11 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
         orderType: 'takeaway',
         note: note.trim(),
         utrNumber: utr.trim(),
-        paymentMethod: paymentMethod, // ← SEND payment method to backend
+        paymentMethod: paymentMethod,
+        couponCode: appliedCoupon?.code || '', // ← NEW
         items: items.map((i) => ({ menuItem: i._id, name: i.name, price: i.price, quantity: i.quantity, veg: i.veg })),
       });
-      setSavedTotal(totalAmount);
+      setSavedTotal(appliedCoupon?.finalAmount ?? totalAmount); // ← show discounted total
       setSavedOrderType('takeaway');
       setPickupToken(res.data.pickupToken);
       setPaymentStatus(res.data.paymentStatus);
@@ -239,9 +247,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
     setLoading(true);
     try {
       const orderRes = await api.post('/payments/create-order', { amount: totalAmount });
-      console.log('Order response:', orderRes.data);
       const { id: order_id, currency, amount } = orderRes.data;
-      console.log('order_id:', order_id, 'amount:', amount);
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount,
@@ -262,14 +268,14 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                 items: items.map((i) => ({ menuItem: i._id, name: i.name, price: i.price, quantity: i.quantity, veg: i.veg })),
               },
             });
+            const newOrderId = verifyRes.data.order._id;
             setSavedTotal(totalAmount);
             setSavedOrderType('takeaway');
             setPickupToken(verifyRes.data.pickupToken);
             setPaymentStatus('paid');
-            setOrderId(verifyRes.data._id);
-            setStep('success');
+            setOrderId(newOrderId);
             saveMyOrder({
-              orderId: verifyRes.data._id,
+              orderId: newOrderId,
               customerName: name.trim(),
               tableNumber: 'Takeaway',
               orderType: 'takeaway',
@@ -280,6 +286,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
               note: note.trim(),
             });
             clearCart();
+            setStep('success');
             toast.success(`Order placed! Pickup: ${verifyRes.data.pickupToken}`, { icon: '🛍️', duration: 5000 });
           } catch (err) {
             setError(err.response?.data?.message || 'Payment verified but order failed. Contact staff.');
@@ -391,7 +398,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                 ))}
                 <div className="border-t border-gray-200 pt-2 flex justify-between">
                   <span className="font-black text-sm" style={{ color: 'var(--ordermodelbgtextonsummery)' }}>Total</span>
-                  <span className="font-black" style={{ color: '#31603D' }}>₹{totalAmount}</span>
+                  <span className="font-black" style={{ color: '#31603D' }}>₹{appliedCoupon ? appliedCoupon.finalAmount : totalAmount}</span>
                 </div>
               </div>
 
@@ -422,7 +429,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                 )}
 
                 {/* Table — dine-in only */}
-                {!isTakeaway && (
+                {/* {!isTakeaway && (
                   <div>
                     <label className="block font-bold text-sm mb-1" style={{ color: 'var(--ordermodelbgtext)' }}>Table Number *</label>
                     <input type="number" value={table} onChange={(e) => setTable(e.target.value)}
@@ -432,7 +439,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                       maxLength={20} />
                     {tableFromQR && <p className="text-gray-100 text-xs mt-1">📍 Auto-detected from QR code</p>}
                   </div>
-                )}
+                )} */}
 
                 {/* Note */}
                 <div>
@@ -443,6 +450,32 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                     placeholder="Allergies or special requests?" rows={2}
                     className="input-base resize-none" maxLength={200} />
                 </div>
+
+                {/* Coupon code input */}
+                <CouponInput
+                  cartTotal={totalAmount}
+                  appliedCoupon={appliedCoupon}
+                  onApply={(coupon) => setAppliedCoupon(coupon)}
+                  onRemove={() => setAppliedCoupon(null)}
+                />
+
+                {/* Discount summary — shown when coupon applied */}
+                {appliedCoupon && (
+                  <div className="rounded-xl px-4 py-2.5 space-y-1" style={{ background: '#f6eee5', border: '1px solid #e0cdb8' }}>
+                    <div className="flex justify-between text-sm">
+                      <span style={{ color: 'var(--ordermodelbgtextonsummery)' }}>Subtotal</span>
+                      <span style={{ color: 'var(--ordermodelbgtextonsummery)' }}>₹{totalAmount}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span style={{ color: '#31603D' }}>Discount ({appliedCoupon.code})</span>
+                      <span className="font-bold" style={{ color: '#31603D' }}>− ₹{appliedCoupon.discountAmount}</span>
+                    </div>
+                    <div className="flex justify-between text-sm border-t border-gray-200 pt-1.5 mt-1">
+                      <span className="font-black" style={{ color: 'var(--ordermodelbgtextonsummery)' }}>You Pay</span>
+                      <span className="font-black" style={{ color: '#31603D' }}>₹{appliedCoupon.finalAmount}</span>
+                    </div>
+                  </div>
+                )}
 
                 {error && (
                   <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 text-sm font-medium">
