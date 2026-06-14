@@ -37,9 +37,9 @@ module.exports = {
 
   superCategories: [
     'All Items',
-    'Chinese',
+    'Meals',
     'Snacks',
-    'Pasta & Maggie',
+    // 'Pasta & Maggie',
     'Noodles',
     'Beverages',
     'Combos',
