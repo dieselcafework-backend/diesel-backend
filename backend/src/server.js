@@ -13,6 +13,7 @@ const orderRoutes = require("./routes/orders");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const shopStatusRoutes = require("./routes/shopStatus");
 const pushRoutes = require('./routes/push');
+const expenseRoutes = require('./routes/expenseRoutes');
 
 const app = express();
 
@@ -85,6 +86,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/shop-status", shopStatusRoutes);
 app.use('/api/push', pushRoutes);
+app.use("/api/expenses", expenseRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({

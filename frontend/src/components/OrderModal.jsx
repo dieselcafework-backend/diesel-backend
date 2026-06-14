@@ -71,7 +71,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
 
   // ── Operational settings from backend ────────────────────────────────────
   const [isTakeawayEnabled, setIsTakeawayEnabled] = useState(true);
-  const [isAutoPayEnabled,  setIsAutoPayEnabled]  = useState(false);
+  const [isAutoPayEnabled, setIsAutoPayEnabled] = useState(false);
 
   const pollRef = useRef(null);
   const prevStatusRef = useRef('pending');
@@ -83,11 +83,11 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
     api.get('/auth/settings')
       .then(res => {
         setIsTakeawayEnabled(res.data.isTakeawayEnabled ?? true);
-        setIsAutoPayEnabled(res.data.isAutoPayEnabled   ?? false);
+        setIsAutoPayEnabled(res.data.isAutoPayEnabled ?? false);
         // If takeaway just got disabled and user had it selected, switch to dine-in
         if (!res.data.isTakeawayEnabled) setOrderType('dine-in');
       })
-      .catch(() => {}); // fail silently — defaults stay
+      .catch(() => { }); // fail silently — defaults stay
   }, []);
 
   useEffect(() => {
@@ -234,6 +234,71 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
     } finally { setSubmitLoading(false); }
   };
 
+  // ── Step 2 (Auto): Razorpay payment handler ───────────────────────────────
+  const handleRazorpayPayment = async () => {
+    setLoading(true);
+    try {
+      const orderRes = await api.post('/payments/create-order', { amount: totalAmount });
+      console.log('Order response:', orderRes.data);
+      const { id: order_id, currency, amount } = orderRes.data;
+      console.log('order_id:', order_id, 'amount:', amount);
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount,
+        currency,
+        name: cafeConfig.name,
+        description: 'Takeaway Order',
+        order_id,
+        handler: async (response) => {
+          try {
+            const verifyRes = await api.post('/payments/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderData: {
+                customerName: name.trim(),
+                phoneNumber: phone.trim(),
+                note: note.trim(),
+                items: items.map((i) => ({ menuItem: i._id, name: i.name, price: i.price, quantity: i.quantity, veg: i.veg })),
+              },
+            });
+            setSavedTotal(totalAmount);
+            setSavedOrderType('takeaway');
+            setPickupToken(verifyRes.data.pickupToken);
+            setPaymentStatus('paid');
+            setOrderId(verifyRes.data._id);
+            setStep('success');
+            saveMyOrder({
+              orderId: verifyRes.data._id,
+              customerName: name.trim(),
+              tableNumber: 'Takeaway',
+              orderType: 'takeaway',
+              items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, veg: i.veg })),
+              totalAmount,
+              pickupToken: verifyRes.data.pickupToken || '',
+              placedAt: new Date().toISOString(),
+              note: note.trim(),
+            });
+            clearCart();
+            toast.success(`Order placed! Pickup: ${verifyRes.data.pickupToken}`, { icon: '🛍️', duration: 5000 });
+          } catch (err) {
+            setError(err.response?.data?.message || 'Payment verified but order failed. Contact staff.');
+          }
+        },
+        prefill: { name: name.trim(), contact: `+91${phone.trim()}` },
+        theme: { color: '#940901' },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', () => setError('Payment failed. Please try again.'));
+      rzp.open();
+    } catch (err) {
+      console.error('Razorpay error:', err.response?.data || err.message);
+      setError(err.response?.data?.message || 'Could not initiate payment. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ─────────────────────────────────────────────────────────────────────────
   const isTakeaway = orderType === 'takeaway';
 
@@ -286,13 +351,13 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                 <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-80" style={{ color: 'var(--ordermodelbgtext)' }}>Order Type</p>
                 <div className={`grid gap-2 ${isTakeawayEnabled ? 'grid-cols-2' : 'grid-cols-1'}`}>
                   {[
-                    { id: 'dine-in',   label: '🍽️ Dine In',   show: true },
-                    { id: 'takeaway',  label: '🛍️ Takeaway',  show: isTakeawayEnabled },
+                    { id: 'dine-in', label: '🍽️ Dine In', show: true },
+                    { id: 'takeaway', label: '🛍️ Takeaway', show: isTakeawayEnabled },
                   ].filter(t => t.show).map((t) => (
                     <button key={t.id} type="button" onClick={() => setOrderType(t.id)}
                       className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-200 active:scale-[0.97]"
                       style={{
-                        background:  orderType === t.id ? 'var(--typeselectorbgactive)' : 'var(--typeselectorbg)',
+                        background: orderType === t.id ? 'var(--typeselectorbgactive)' : 'var(--typeselectorbg)',
                         borderColor: orderType === t.id ? 'var(--typeselectorborderactive)' : 'var(--typeselectorborderinactive)',
                         color: 'var(--typeselectortextactive)',
                         boxShadow: orderType === t.id ? 'var(--typeselectorshadowactive)' : 'var(--typeselectorshadowinactive)',
@@ -451,7 +516,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                       </span>
                     ) : (
                       <span className="flex items-center justify-center gap-2">
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" /></svg>
                         Pay ₹{totalAmount} — UPI / Card / NetBanking
                       </span>
                     )}
@@ -475,7 +540,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                         <button key={m.id} type="button" onClick={() => setPaymentMethod(m.id)}
                           className="flex flex-col items-center justify-center py-3 px-2 rounded-xl text-xs font-bold border-2 transition-all active:scale-[0.97] text-center"
                           style={{
-                            background:  paymentMethod === m.id ? 'var(--typeselectorbgactive)' : 'rgba(255,255,255,0.12)',
+                            background: paymentMethod === m.id ? 'var(--typeselectorbgactive)' : 'rgba(255,255,255,0.12)',
                             borderColor: paymentMethod === m.id ? 'var(--typeselectorborderactive)' : 'rgba(255,255,255,0.25)',
                             color: 'white',
                             boxShadow: paymentMethod === m.id ? '0 4px 12px var(--typeselectorbgactive)' : 'none',

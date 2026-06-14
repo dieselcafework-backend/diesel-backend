@@ -40,10 +40,10 @@ export const cafeConfig = {
   // ── ① IDENTITY ────────────────────────────────────────────────────────────
   // The café's public-facing name and personality.
 
-  name: 'Diesel Cafe',               // Full name used in titles, toasts
-  nameLine1: 'Diesel',                     // Navbar logo — first line
-  nameLine2: 'Cafe',
-  adminname: 'Niddhi',         // Admin panel name
+  name: 'Velvet Vault',               // Full name used in titles, toasts
+  nameLine1: 'Velvet',                     // Navbar logo — first line
+  nameLine2: 'Vault',
+  adminname: 'Abhay',         // Admin panel name
   tagline: 'Where every sip tells a story',
   description: 'Experience premium taste & comfort',
   type: 'CAFE',                       // 'Café' | 'Restaurant' | 'Bakery'
@@ -53,10 +53,10 @@ export const cafeConfig = {
   // Shown to customers during the takeaway checkout UPI flow.
 
   contact: {
-    phone: '9696028522',
-    whatsapp: '919696028522',   // with country code, no + (for wa.me links)
-    upiId: '9696028522@ybl',
-    upiName: 'Diesel Café',
+    phone: '6388933194',    // for display in UPI payment flow (with country code, no +)
+    whatsapp: '6388933194',   // with country code, no + (for wa.me links)
+    upiId: 'BHARATPE2N0E0T1S4X94362@UNITYPE',
+    upiName: 'Velvet Vault',
   },
 
   
@@ -64,9 +64,9 @@ export const cafeConfig = {
   // ── ③ ADMIN ───────────────────────────────────────────────────────────────
   
   admin: {
-    email: 'admin@dieselcafe.com',   // used in createAdmin.js
-    emailPlaceholder: 'admin@cdieselcafe.com',    // shown in login form
-    tokenKey: 'diesel_cafe_admin_token',
+    email: 'admin@velvetvault.com',   // used in createAdmin.js
+    emailPlaceholder: 'admin@velvetvault.com',    // shown in login form
+    tokenKey: 'velvet_vault_admin_token',
   },
 
 
@@ -91,6 +91,7 @@ export const cafeConfig = {
     'Chinese',
     'Snacks',
     'Pasta & Maggie',
+    'Noodles',
     'Beverages',
     'Combos',
   ],
@@ -143,7 +144,7 @@ export const cafeConfig = {
     ordermodelbgtextonsummery: '#4a262b',
     ordermodelbgmesseges: '#dcf309',
     canclebuttonbg: '#ffffff',
-    canclebuttonborder: '#000000',
+    canclebuttonborder: '#ffffff',
     typeselectorbgactive: '#940901',
     typeselectorbg: '#0000004d',
     typeselectorborderactive: '#940901',

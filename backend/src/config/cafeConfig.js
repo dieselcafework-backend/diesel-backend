@@ -34,6 +34,17 @@ module.exports = {
     name: 'Sahil'
   },
 
+
+  superCategories: [
+    'All Items',
+    'Chinese',
+    'Snacks',
+    'Pasta & Maggie',
+    'Noodles',
+    'Beverages',
+    'Combos',
+  ],
+
   // ── ③ ENVIRONMENT VARIABLES ──────────────────────────────────────
   // These READ from Render environment variables.
   // Set each one in: Render → your service → Environment

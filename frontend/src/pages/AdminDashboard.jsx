@@ -10,8 +10,11 @@ import ChangePassword from '../components/ChangePassword';
 import ShopToggle, { TakeawayToggle, AutoPayToggle } from '../components/ShopToggle';
 import SalesAnalytics from '../components/SalesAnalytics';
 import AnalyticsPanel from '../components/AnalyticsPanel';
+import CouponsPage from './CouponsPage';
+import ExpensePage from './ExpensePage';
 // ── WhatsApp helpers ───────────────────────────────────────────────────────────
 const WHATSAPP_NUMBER = cafeConfig.contact.whatsapp;
+
 
 const formatSingleOrderWA = (order) => {
   const time = new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
@@ -62,7 +65,8 @@ const STATUS_COLORS = {
 const NEXT_STATUS = { pending: 'accepted', accepted: 'preparing', preparing: 'ready', ready: 'completed' };
 const STATUS_LABELS = { pending: 'Pending', accepted: 'Accepted', preparing: 'Preparing', ready: 'Ready', completed: 'Completed' };
 const NEXT_LABELS = { pending: '✓ Accept', accepted: '🍳 Start Cooking', preparing: '✅ Mark Ready', ready: '🍽️ Complete' };
-const SUPER_CATS = ['Chinese', 'Snacks', 'Pasta & Maggie', 'Beverages', 'Combos',];
+// const SUPER_CATS = ['Chinese', 'Snacks', 'Pasta & Maggie', 'Beverages', 'Combos',];
+const SUPER_CATS = cafeConfig.superCategories;
 
 // ── Reusable bits ──────────────────────────────────────────────────────────────
 const Spinner = () => (
@@ -133,7 +137,7 @@ const QRGenerator = () => {
         {/* Header */}
         <div className="flex items-center gap-3 mb-5">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, var(--admin), var(--admin-dark))' }}>
+            style={{ background: 'linear-gradient(135deg, #940901, #7c1d1d)' }}>
             <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
               <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13 0h-2v2h2v-2zm0 4h-2v2h2v-2zm2-4h-2v2h2v-2zm0 4h-2v2h2v-2zm-4-8h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h-2v2h2v-2z" />
             </svg>
@@ -160,7 +164,7 @@ const QRGenerator = () => {
           <button
             onClick={() => { if (parseInt(tableCount) > 0) setGenerated(true); }}
             className="px-5 py-2.5 rounded-xl text-sm font-black text-white transition-all active:scale-[0.98]"
-            style={{ background: 'linear-gradient(135deg, var(--admin), var(--admin-dark))', boxShadow: '0 4px 12px rgba(50,88,98,0.3)' }}
+            style={{ background: 'linear-gradient(135deg, #940901, #7c1d1d)', boxShadow: '0 4px 12px rgba(50,88,98,0.3)' }}
           >
             Generate
           </button>
@@ -179,7 +183,7 @@ const QRGenerator = () => {
                     className="w-full aspect-square rounded-lg"
                     style={{ maxWidth: 100 }}
                   />
-                  <p className="font-black text-xs mt-2" style={{ color: 'var(--admin)' }}>Table {n}</p>
+                  <p className="font-black text-xs mt-2" style={{ color: '#940901' }}>Table {n}</p>
                 </div>
               ))}
             </div>
@@ -215,7 +219,8 @@ const AdminDashboard = () => {
   const [authReady, setAuthReady] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [orderTypeFilter, setOrderTypeFilter] = useState('all')
+  const [orderTypeFilter, setOrderTypeFilter] = useState('all');
+  const [orderDateFilter, setOrderDateFilter] = useState('today'); // 'today' | 'yesterday' | 'all'
   const [adminName, setAdminName] = useState('Admin');
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -237,6 +242,18 @@ const AdminDashboard = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState(localStorage.getItem('velvet_vault_logo_url') || '');
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const [fromDate, setFromDate] = useState(today);
+  const [toDate, setToDate] = useState(today);
+
+  const [historyOrders, setHistoryOrders] = useState([]);
+  const [historySummary, setHistorySummary] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const [historyTypeFilter, setHistoryTypeFilter] = useState('all');
+  const [historyStatusFilter, setHistoryStatusFilter] = useState('all');
 
   const pollRef = useRef(null);
   const knownOrderIdsRef = useRef(null);   // null = first fetch not yet done
@@ -436,6 +453,113 @@ const AdminDashboard = () => {
   const fetchMenu = useCallback(async () => { try { const r = await api.get('/menu'); setMenuItems(r.data); } catch (_) { } }, []);
   const fetchStats = useCallback(async () => { try { const r = await api.get('/orders/daily-stats'); setStats({ totalSales: r.data.totalSales, totalOrders: r.data.totalOrders }); } catch (_) { } }, []);
 
+  const fetchHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const params = { from: fromDate, to: toDate };
+      if (historyTypeFilter !== 'all') params.orderType = historyTypeFilter;
+      if (historyStatusFilter !== 'all') params.status = historyStatusFilter;
+      const res = await api.get('/orders/history', { params });
+      setHistoryOrders(res.data.orders || []);
+      setHistorySummary(res.data.summary || null);
+    } catch (_) { toast.error('Failed to load order history'); }
+    finally { setHistoryLoading(false); }
+  }, [fromDate, toDate, historyTypeFilter, historyStatusFilter]);
+
+  const setQuickDate = (type) => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    if (type === 'today') {
+      setFromDate(today); setToDate(today);
+    } else if (type === 'yesterday') {
+      const y = new Date(now); y.setDate(now.getDate() - 1);
+      const ys = y.toISOString().split('T')[0];
+      setFromDate(ys); setToDate(ys);
+    } else if (type === 'week') {
+      const w = new Date(now); w.setDate(now.getDate() - 6);
+      setFromDate(w.toISOString().split('T')[0]); setToDate(today);
+    } else if (type === 'month') {
+      const m = new Date(now.getFullYear(), now.getMonth(), 1);
+      setFromDate(m.toISOString().split('T')[0]); setToDate(today);
+    }
+  };
+
+  const exportCSV = () => {
+    if (!historyOrders.length) { toast('No orders to export'); return; }
+    const headers = ['Date', 'Time', 'Customer', 'Phone', 'Table', 'Type', 'Items', 'Amount', 'Status', 'Payment', 'Token/UTR'];
+    const rows = historyOrders.map((o) => [
+      new Date(o.createdAt).toLocaleDateString('en-IN'),
+      new Date(o.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+      o.customerName,
+      o.phoneNumber || '',
+      o.tableNumber,
+      o.orderType || 'dine-in',
+      o.items.map((i) => `${i.name} x${i.quantity}`).join('; '),
+      `Rs.${o.totalAmount}`,
+      o.status,
+      o.paymentStatus || '',
+      o.orderType === 'takeaway' ? (o.pickupToken || o.utrNumber || '') : '',
+    ]);
+    const csv = [headers, ...rows]
+      .map((r) => r.map((c) => `"${String(c || '').replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders_${fromDate}_to_${toDate}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('CSV downloaded!', { icon: '📥' });
+  };
+
+  const exportHistoryWA = () => {
+    if (!historyOrders.length) { toast('No orders to export'); return; }
+    const s = historySummary;
+    const from = new Date(fromDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    const to = new Date(toDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    // ── Build coupon usage map from orders ────────────────────────────────────
+    const couponMap = {};
+    historyOrders.forEach((o) => {
+      if (o.couponCode) {
+        if (!couponMap[o.couponCode]) couponMap[o.couponCode] = { uses: 0, saved: 0 };
+        couponMap[o.couponCode].uses += 1;
+        couponMap[o.couponCode].saved += o.discountAmount || 0;
+      }
+    });
+    const couponEntries = Object.entries(couponMap).sort((a, b) => b[1].uses - a[1].uses);
+    const totalDiscountGiven = couponEntries.reduce((sum, [, v]) => sum + v.saved, 0);
+
+    let msg = `📊 *${cafeConfig.name} — Order History*\n`;
+    msg += `📅 ${from} – ${to}\n`;
+    msg += `${'─'.repeat(28)}\n`;
+    msg += `📦 Total Orders: *${s?.totalOrders || historyOrders.length}*\n`;
+    msg += `💰 Total Sales:  *₹${(s?.totalSales || 0).toLocaleString()}*\n`;
+    msg += `🍽️ Dine In:   ${s?.dineInCount || 0}  (₹${(s?.dineInSales || 0).toLocaleString()})\n`;
+    msg += `🛍️ Takeaway:  ${s?.takeawayCount || 0}  (₹${(s?.takeawaySales || 0).toLocaleString()})\n`;
+    if (couponEntries.length > 0) {
+      msg += `${'─'.repeat(28)}\n`;
+      msg += `🏷️ *Coupon Usage:*\n`;
+      couponEntries.forEach(([code, data]) => {
+        msg += `  • ${code} — used ${data.uses}× — saved ₹${data.saved.toLocaleString()}\n`;
+      });
+      msg += `💸 Total Discount Given: *₹${totalDiscountGiven.toLocaleString()}*\n`;
+    }
+    if (s?.topItems?.length) {
+      msg += `${'─'.repeat(28)}\n`;
+      msg += `*Top Items:*\n`;
+      s.topItems.slice(0, 5).forEach((item, i) => {
+        msg += `${i + 1}. ${item.name} ×${item.qty} — ₹${item.revenue}\n`;
+      });
+    }
+    msg += `${'─'.repeat(28)}\n`;
+    msg += `_Exported from ${cafeConfig.name} Admin_`;
+    openWhatsApp(msg);
+  };
+
   useEffect(() => {
     if (!authReady) return;  // ← wait for token to be confirmed
     const init = async () => {
@@ -522,6 +646,28 @@ const AdminDashboard = () => {
 
     return () => clearInterval(reminderRef.current);
   }, [authReady, playReminderSound]);
+
+
+  // ── Midnight auto-reset — refresh orders + stats when day rolls over ─────────
+  useEffect(() => {
+    if (!authReady) return;
+    const scheduleReset = () => {
+      const now = new Date();
+      const msUntilMidnight =
+        new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5).getTime() - now.getTime();
+      return setTimeout(async () => {
+        // Reset orders + stats for the new day
+        setOrders([]);
+        knownOrderIdsRef.current = null; // re-seed on next poll
+        await Promise.all([fetchOrders(true), fetchStats()]);
+        toast('🌅 New day started — orders refreshed!', { duration: 5000 });
+        // Schedule the next midnight reset
+        scheduleReset();
+      }, msUntilMidnight);
+    };
+    const t = scheduleReset();
+    return () => clearTimeout(t);
+  }, [authReady, fetchOrders, fetchStats]);
 
   // ── Order status update ───────────────────────────────────────────────────────
   const updateOrderStatus = async (id, status) => {
@@ -661,7 +807,29 @@ const AdminDashboard = () => {
   const pendingCount = orders.filter((o) => o.status === 'pending').length;
   const filteredOrders = orders
     .filter((o) => statusFilter === 'all' || o.status === statusFilter)
-    .filter((o) => orderTypeFilter === 'all' || (o.orderType || 'dine-in') === orderTypeFilter);
+    .filter((o) => orderTypeFilter === 'all' || (o.orderType || 'dine-in') === orderTypeFilter)
+    .filter((o) => {
+      if (orderDateFilter === 'all') return true;
+      const orderDate = new Date(o.createdAt).toISOString().split('T')[0];
+      const now = new Date();
+      if (orderDateFilter === 'today') return orderDate === now.toISOString().split('T')[0];
+      if (orderDateFilter === 'yesterday') {
+        const y = new Date(now); y.setDate(now.getDate() - 1);
+        return orderDate === y.toISOString().split('T')[0];
+      }
+      return true;
+    });
+
+  // Group filteredOrders by date for day-separator rendering
+  const groupedOrders = filteredOrders.reduce((acc, order) => {
+    const dateKey = new Date(order.createdAt).toLocaleDateString('en-IN', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(order);
+    return acc;
+  }, {});
+  const groupedOrderEntries = Object.entries(groupedOrders); // [ [dateLabel, orders[]], ... ]
 
   // ── Loading screen ────────────────────────────────────────────────────────────
   if (loading) return (
@@ -781,6 +949,7 @@ const AdminDashboard = () => {
             { id: 'stats', label: 'Reports' },
             { id: 'analytics', label: 'Analytics' },
             { id: 'settings', label: 'Settings' },
+            { id: 'expenses', label: 'Finance' },
           ].map((t) => (
             <button
               key={t.id}
@@ -840,6 +1009,25 @@ const AdminDashboard = () => {
               )}
             </div>
 
+            {/* Date filter row */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              {[
+                { id: 'today', label: "Today" },
+                { id: 'yesterday', label: 'Yesterday' },
+                { id: 'all', label: 'All Days' },
+              ].map((d) => (
+                <button key={d.id} onClick={() => setOrderDateFilter(d.id)}
+                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                  style={{
+                    background: orderDateFilter === d.id ? 'var(--accent-dark,#b45309)' : (document.documentElement.classList.contains('dark') ? '#374151' : 'white'),
+                    color: orderDateFilter === d.id ? 'white' : 'var(--admin-tab-inactive)',
+                    borderColor: orderDateFilter === d.id ? 'var(--accent-dark,#b45309)' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#e5e7eb'),
+                  }}>
+                  {d.label}
+                </button>
+              ))}
+            </div>
+
             {/* Order type filter row */}
             <div className="flex gap-1.5 overflow-x-auto scrollbar pb-0.5">
               {[
@@ -859,14 +1047,27 @@ const AdminDashboard = () => {
               ))}
             </div>
 
-            {/* Orders list */}
+            {/* Orders list — grouped by date */}
             {filteredOrders.length === 0 ? (
               <div className={`py-16 text-center ${C.card} rounded-2xl shadow-sm`}>
                 <div className="text-5xl mb-3">📋</div>
                 <p className={`font-bold ${C.text}`}>No orders here</p>
                 <p className={`${C.muted} text-sm mt-1`}>Orders appear in real-time (every 5s)</p>
               </div>
-            ) : filteredOrders.map((order) => (
+            ) : groupedOrderEntries.map(([dateLabel, dayOrders]) => (
+              <div key={dateLabel} className="space-y-3">
+                {/* Date separator */}
+                <div className="flex items-center gap-3 py-1">
+                  <div className="flex-1 h-px" style={{ background: 'rgba(214,153,60,0.25)' }} />
+                  <span
+                    className="flex-shrink-0 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full"
+                    style={{ background: 'rgba(214,153,60,0.12)', color: 'var(--accent-dark,#b45309)', border: '1px solid rgba(214,153,60,0.25)' }}
+                  >
+                    📅 {dateLabel} · {dayOrders.length} order{dayOrders.length !== 1 ? 's' : ''}
+                  </span>
+                  <div className="flex-1 h-px" style={{ background: 'rgba(214,153,60,0.25)' }} />
+                </div>
+                {dayOrders.map((order) => (
               <div key={order._id}
                 className={`${C.card} rounded-2xl overflow-hidden transition-all duration-300 shadow-sm`}
                 style={{ borderLeft: order.status === 'pending' ? '3px solid var(--admin-pending-border)' : '3px solid transparent' }}
@@ -925,6 +1126,41 @@ const AdminDashboard = () => {
                   ))}
                   {order.note && <p className={`${C.muted} text-xs italic mt-1.5 border-t ${C.border} pt-1.5`}>📝 {order.note}</p>}
                 </div>
+
+
+                {/* Coupon / Discount row */}
+                {order.couponCode && (
+                  <div className={`px-4 pb-2.5 border-t ${C.border} pt-2 flex items-center justify-between gap-2 flex-wrap`}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black tracking-widest"
+                        style={{
+                          background: 'rgba(214,153,60,0.12)',
+                          color: 'var(--accent-dark, #b45309)',
+                          border: '1px solid rgba(214,153,60,0.35)',
+                          fontFamily: 'monospace',
+                        }}
+                      >
+                        🏷️ {order.couponCode}
+                      </span>
+                      {order.discountAmount > 0 && (
+                        <span
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold"
+                          style={{ background: 'rgba(5,150,105,0.08)', color: '#059669', border: '1px solid rgba(5,150,105,0.2)' }}
+                        >
+                          − ₹{order.discountAmount} saved
+                        </span>
+                      )}
+                    </div>
+                    {order.originalAmount > 0 && order.originalAmount !== order.totalAmount && (
+                      <span className={`text-xs ${C.muted}`}>
+                        <span style={{ textDecoration: 'line-through' }}>₹{order.originalAmount}</span>
+                        {' → '}
+                        <span className="font-black" style={{ color: '#059669' }}>₹{order.totalAmount}</span>
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Takeaway — pickup token, UTR, payment method, verify button */}
                 {order.orderType === 'takeaway' && (
@@ -997,17 +1233,18 @@ const AdminDashboard = () => {
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ))}
+        </div>
         )}
-
         {/* ══ MENU TAB ═══════════════════════════════════════════════════════ */}
         {tab === 'menu' && (
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className={`font-black ${C.text} text-base`}>Menu Items <span className={`${C.muted} font-normal`}>({menuItems.length})</span></h2>
               <button onClick={openAddForm} className="text-white text-xs font-black px-4 py-2 rounded-full active:scale-95 transition-all"
-                style={{ background: 'linear-gradient(135deg, var(--admin), var(--admin-dark))' }}>
+                style={{ background: 'linear-gradient(135deg, #940901, #7c1d1d)' }}>
                 + Add Item
               </button>
             </div>
@@ -1037,7 +1274,7 @@ const AdminDashboard = () => {
                             <div className="flex gap-1 flex-shrink-0 items-center">
                               <button onClick={() => toggleAvailability(item)}
                                 className="text-xs px-2 py-1 rounded-lg font-bold border transition-all"
-                                style={item.available ? { background: 'var(--admin-menu-on-bg)', color: 'var(--admin)', borderColor: 'var(--admin-menu-on-border)' } : { background: document.documentElement.classList.contains('dark') ? '#374151' : '#f3f4f6', color: 'var(--admin-tab-inactive)', borderColor: document.documentElement.classList.contains('dark') ? '#4b5563' : '#e5e7eb' }}>
+                                style={item.available ? { background: 'var(--admin-menu-on-bg)', color: '#940901', borderColor: 'var(--admin-menu-on-border)' } : { background: document.documentElement.classList.contains('dark') ? '#374151' : '#f3f4f6', color: 'var(--admin-tab-inactive)', borderColor: document.documentElement.classList.contains('dark') ? '#4b5563' : '#e5e7eb' }}>
                                 {item.available ? 'ON' : 'OFF'}
                               </button>
                               <button onClick={() => openEditForm(item)} className={`p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${C.muted} hover:text-gray-600 dark:hover:text-gray-200 transition-colors`}>
@@ -1113,7 +1350,7 @@ const AdminDashboard = () => {
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-1">
                   <svg viewBox="0 0 24 24" className="w-4 h-4" style={{ fill: 'var(--admin-accent)' }}>
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
                   </svg>
                   <h2 className={`font-black text-base ${C.text}`}>Operational Controls</h2>
                 </div>
@@ -1130,6 +1367,24 @@ const AdminDashboard = () => {
                   <p className={`text-[11px] ${C.muted}`}>🥡 <strong>Takeaway</strong> — hides takeaway option from customer menu</p>
                   <p className={`text-[11px] ${C.muted}`}>⚡ <strong>Auto Pay</strong> — Razorpay checkout (ON) vs manual UPI + UTR (OFF)</p>
                 </div>
+              </div>
+            </div>
+
+
+            {/* ── Coupons Management ───────────────────── */}
+            <div className={`${C.card} rounded-2xl shadow-sm overflow-hidden`}>
+              <div
+                className="h-1 w-full"
+                style={{
+                  background: 'linear-gradient(90deg, var(--admin), var(--accent))'
+                }}
+              />
+              <div className="p-5">
+                <h2 className={`font-black text-base mb-4 ${C.text}`}>
+                  🏷️ Coupon Management
+                </h2>
+
+                <CouponsPage C={C} />
               </div>
             </div>
 
@@ -1185,7 +1440,7 @@ const AdminDashboard = () => {
               <div className="p-5">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'linear-gradient(135deg, var(--admin), var(--admin-dark))' }}>
+                    style={{ background: 'linear-gradient(135deg, #940901, #7c1d1d)' }}>
                     <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
                       <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
                     </svg>
@@ -1270,6 +1525,239 @@ const AdminDashboard = () => {
 
             {/* ── Table QR Code Generator ── */}
             <QRGenerator />
+
+            {/* ── Order History ─────────────────────────────────────────────── */}
+            <div className={`${C.card} rounded-2xl shadow-sm overflow-hidden`}>
+              <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #940901, #7c1d1d)' }} />
+              <div className="p-5">
+                <h2 className={`font-black text-base mb-4 ${C.text}`}>📅 Order History</h2>
+
+                {/* Quick date buttons */}
+                <div className="flex gap-2 flex-wrap mb-4">
+                  {[
+                    { id: 'today', label: 'Today' },
+                    { id: 'yesterday', label: 'Yesterday' },
+                    { id: 'week', label: 'Last 7 Days' },
+                    { id: 'month', label: 'This Month' },
+                  ].map((q) => (
+                    <button key={q.id} onClick={() => setQuickDate(q.id)}
+                      className="px-3 py-1.5 rounded-full text-xs font-bold text-white transition-all active:scale-95"
+                      style={{ background: 'linear-gradient(135deg, #940901, #7c1d1d)' }}>
+                      {q.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Date range pickers */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className={`block ${C.muted} font-bold text-xs mb-1 uppercase tracking-wide`}>From</label>
+                    <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
+                      className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none ${C.input}`} />
+                  </div>
+                  <div>
+                    <label className={`block ${C.muted} font-bold text-xs mb-1 uppercase tracking-wide`}>To</label>
+                    <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
+                      className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none ${C.input}`} />
+                  </div>
+                </div>
+
+                {/* Type + Status filters */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <label className={`block ${C.muted} font-bold text-xs mb-1 uppercase tracking-wide`}>Order Type</label>
+                    <select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}
+                      className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none ${C.input}`}>
+                      <option value="all">All Types</option>
+                      <option value="dine-in">🍽️ Dine In</option>
+                      <option value="takeaway">🛍️ Takeaway</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={`block ${C.muted} font-bold text-xs mb-1 uppercase tracking-wide`}>Status</label>
+                    <select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}
+                      className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none ${C.input}`}>
+                      <option value="all">All Statuses</option>
+                      <option value="completed">✅ Completed</option>
+                      <option value="ready">Ready</option>
+                      <option value="preparing">Preparing</option>
+                      <option value="accepted">Accepted</option>
+                      <option value="pending">⏳ Pending</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button onClick={fetchHistory} disabled={historyLoading}
+                  className="w-full py-3 rounded-2xl font-black text-sm text-white disabled:opacity-60 transition-all active:scale-[0.98] mb-4"
+                  style={{ background: 'linear-gradient(135deg, #940901, #7c1d1d)' }}>
+                  {historyLoading
+                    ? <span className="flex items-center justify-center gap-2"><Spinner /> Searching…</span>
+                    : '🔍 Search Orders'}
+                </button>
+
+                {/* Results */}
+                {!historyLoading && historyOrders.length === 0 && historySummary === null && (
+                  <div className="py-10 text-center">
+                    <div className="text-3xl mb-2">📅</div>
+                    <p className={`font-bold text-sm ${C.text}`}>No results yet</p>
+                    <p className={`${C.muted} text-xs mt-1`}>Select a date range and click Search</p>
+                  </div>
+                )}
+
+                {historySummary !== null && historyOrders.length === 0 && (
+                  <div className="py-10 text-center">
+                    <div className="text-3xl mb-2">🗂️</div>
+                    <p className={`font-bold text-sm ${C.text}`}>No orders found</p>
+                    <p className={`${C.muted} text-xs mt-1`}>Try a different date range</p>
+                  </div>
+                )}
+
+                {historyOrders.length > 0 && (
+                  <div className="space-y-4">
+                    {/* Summary cards */}
+                    {(() => {
+                      const couponMap = {};
+                      historyOrders.forEach((o) => {
+                        if (o.couponCode) {
+                          if (!couponMap[o.couponCode]) couponMap[o.couponCode] = { uses: 0, saved: 0 };
+                          couponMap[o.couponCode].uses += 1;
+                          couponMap[o.couponCode].saved += o.discountAmount || 0;
+                        }
+                      });
+                      const couponEntries = Object.entries(couponMap).sort((a, b) => b[1].uses - a[1].uses);
+                      const totalDiscount = couponEntries.reduce((s, [, v]) => s + v.saved, 0);
+                      const couponOrdersCount = historyOrders.filter((o) => o.couponCode).length;
+                      return (
+                        <>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {[
+                              { label: 'Total Orders', value: historySummary?.totalOrders || historyOrders.length, color: undefined },
+                              { label: 'Total Sales', value: `₹${(historySummary?.totalSales || 0).toLocaleString()}`, color: '#940901' },
+                              { label: 'Dine In', value: historySummary?.dineInCount || 0, color: '#31603D' },
+                              { label: 'Takeaway', value: historySummary?.takeawayCount || 0, color: '#940901' },
+                            ].map((s) => (
+                              <div key={s.label} className={`${C.card} rounded-xl px-4 py-3 text-center shadow-sm`}>
+                                <p className="font-black text-xl leading-none" style={{ color: s.color || '#1F1F1F' }}>{s.value}</p>
+                                <p className={`${C.muted} text-[10px] font-bold uppercase tracking-wide mt-1`}>{s.label}</p>
+                              </div>
+                            ))}
+                          </div>
+                          {couponEntries.length > 0 && (
+                            <div className={`${C.card} rounded-2xl p-4 shadow-sm`}>
+                              <div className="flex items-center justify-between mb-3">
+                                <h4 className={`font-black ${C.text} text-sm`}>🏷️ Coupon Usage</h4>
+                                <div className="flex gap-3">
+                                  <div className="text-right">
+                                    <p className="font-black text-base" style={{ color: '#059669' }}>₹{totalDiscount.toLocaleString()}</p>
+                                    <p className={`text-[10px] font-bold uppercase tracking-wide ${C.muted}`}>Saved</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-black text-base" style={{ color: '#b45309' }}>{couponOrdersCount}</p>
+                                    <p className={`text-[10px] font-bold uppercase tracking-wide ${C.muted}`}>Orders</p>
+                                  </div>
+                                </div>
+                              </div>
+                              {couponEntries.map(([code, data]) => (
+                                <div key={code} className="flex items-center gap-3 mb-2">
+                                  <span className="text-xs font-black px-2.5 py-1 rounded-lg flex-shrink-0"
+                                    style={{ background: 'rgba(214,153,60,0.12)', color: '#b45309', border: '1px solid rgba(214,153,60,0.3)', fontFamily: 'monospace' }}>
+                                    {code}
+                                  </span>
+                                  <div className="flex-1">
+                                    <div className="flex justify-between mb-0.5">
+                                      <span className={`text-xs font-bold ${C.text}`}>Used {data.uses}×</span>
+                                      <span className="text-xs font-bold" style={{ color: '#059669' }}>₹{data.saved.toLocaleString()} saved</span>
+                                    </div>
+                                    <div className="h-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                                      <div className="h-1.5 rounded-full" style={{ width: `${(data.uses / couponEntries[0][1].uses) * 100}%`, background: 'linear-gradient(90deg,#d6993c,#b45309)' }} />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+
+                    {/* Top items */}
+                    {historySummary?.topItems?.length > 0 && (
+                      <div className={`${C.card} rounded-2xl p-4 shadow-sm`}>
+                        <h4 className={`font-black ${C.text} text-sm mb-3`}>🏆 Top Items</h4>
+                        {historySummary.topItems.slice(0, 5).map((item, i) => (
+                          <div key={item.name} className="flex items-center gap-3 mb-2">
+                            <span className="text-xs font-black w-5 text-center" style={{ color: i === 0 ? '#d6993c' : '#6b7280' }}>{i + 1}</span>
+                            <div className="flex-1">
+                              <div className="flex justify-between mb-0.5">
+                                <span className={`text-xs font-bold ${C.text} truncate`}>{item.name}</span>
+                                <span className={`text-xs ${C.muted} ml-2`}>×{item.qty} · ₹{item.revenue}</span>
+                              </div>
+                              <div className="h-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                                <div className="h-1.5 rounded-full" style={{ width: `${(item.qty / historySummary.topItems[0].qty) * 100}%`, background: 'linear-gradient(90deg,#940901,#7c1d1d)' }} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Export buttons */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <button onClick={exportCSV}
+                        className="flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-sm text-white"
+                        style={{ background: 'linear-gradient(135deg,#059669,#047857)' }}>
+                        📥 CSV
+                      </button>
+                      <button onClick={exportHistoryWA}
+                        className="flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-sm text-white"
+                        style={{ background: 'linear-gradient(135deg,#25D366,#128C7E)' }}>
+                        📲 WhatsApp
+                      </button>
+                    </div>
+
+                    {/* Orders list */}
+                    <div className="space-y-2">
+                      {historyOrders.map((order) => (
+                        <div key={order._id} className={`${C.card} rounded-xl shadow-sm overflow-hidden`}>
+                          <div className="px-4 py-3 flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <span className={`font-black ${C.text} text-sm`}>{order.customerName}</span>
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full"
+                                  style={{ background: (order.orderType || 'dine-in') === 'takeaway' ? 'rgba(148,9,1,0.1)' : 'rgba(49,96,61,0.1)', color: (order.orderType || 'dine-in') === 'takeaway' ? '#940901' : '#31603D' }}>
+                                  {(order.orderType || 'dine-in') === 'takeaway' ? '🛍️ Takeaway' : '🍽️ Dine In'}
+                                </span>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${STATUS_COLORS[order.status]}`}>{STATUS_LABELS[order.status]}</span>
+                              </div>
+                              <p className={`${C.muted} text-xs mb-1`}>
+                                {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                                {order.orderType !== 'takeaway' && order.tableNumber && ` · Table ${order.tableNumber}`}
+                              </p>
+                              {order.items.map((it, idx) => (
+                                <p key={idx} className={`text-xs ${C.muted}`}>{it.name} ×{it.quantity} — ₹{it.price * it.quantity}</p>
+                              ))}
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              {order.couponCode && order.originalAmount > order.totalAmount ? (
+                                <>
+                                  <p className="text-[10px] line-through" style={{ color: '#9ca3af' }}>₹{order.originalAmount}</p>
+                                  <p className="font-black text-sm" style={{ color: '#059669' }}>₹{order.totalAmount}</p>
+                                </>
+                              ) : (
+                                <p className="font-black text-sm" style={{ color: '#940901' }}>₹{order.totalAmount}</p>
+                              )}
+                              {order.couponCode && (
+                                <p className="text-[10px] font-black mt-0.5" style={{ color: '#b45309', fontFamily: 'monospace' }}>🏷️ {order.couponCode}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </main>
@@ -1280,6 +1768,7 @@ const AdminDashboard = () => {
           <AnalyticsPanel />
         </div>
       )}
+
 
       {/* ══ Menu Item Form Modal ═══════════════════════════════════════════════ */}
       {formOpen && (
@@ -1380,6 +1869,13 @@ const AdminDashboard = () => {
         </div>
       )}
 
+
+      {/* ══ EXPENSES TAB ═════════════════════════════════════════════════════════════ */}
+      {tab === 'expenses' && (
+        <div className="max-w-4xl mx-auto px-4 py-4 pb-24">
+          <ExpensePage C={C} />
+        </div>
+      )}
       {/* ══ Delete Menu Item Confirm ══════════════════════════════════════════ */}
       {deleteMenuConfirm && (
         <Modal onClose={() => setDeleteMenuConfirm(null)}>
