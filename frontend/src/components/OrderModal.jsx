@@ -151,7 +151,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
     e.preventDefault();
     setError('');
     if (!name.trim()) return setError('Please enter your name.');
-    // if (orderType === 'dine-in' && !table.trim()) return setError('Please enter your table number.');
+    if (orderType === 'dine-in' && !table.trim()) return setError('Please enter your table number.');
     if (orderType === 'takeaway') {
       if (!phone.trim()) return setError('Please enter your mobile number.');
       if (!/^[6-9]\d{9}$/.test(phone.trim())) return setError('Enter a valid 10-digit mobile number.');
@@ -163,7 +163,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
       try {
         const res = await api.post('/orders', {
           customerName: name.trim(),
-          tableNumber: 'N/A',
+          tableNumber: '',
           orderType: 'dine-in',
           note: note.trim(),
           items: items.map((i) => ({ menuItem: i._id, name: i.name, price: i.price, quantity: i.quantity, veg: i.veg })),
@@ -429,7 +429,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                 )}
 
                 {/* Table — dine-in only */}
-                {/* {!isTakeaway && (
+                {!isTakeaway && (
                   <div>
                     <label className="block font-bold text-sm mb-1" style={{ color: 'var(--ordermodelbgtext)' }}>Table Number *</label>
                     <input type="number" value={table} onChange={(e) => setTable(e.target.value)}
@@ -439,7 +439,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                       maxLength={20} />
                     {tableFromQR && <p className="text-gray-100 text-xs mt-1">📍 Auto-detected from QR code</p>}
                   </div>
-                )} */}
+                )}
 
                 {/* Note */}
                 <div>

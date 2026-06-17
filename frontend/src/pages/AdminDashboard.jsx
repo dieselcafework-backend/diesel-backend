@@ -94,7 +94,7 @@ const QRGenerator = () => {
   const [generated, setGenerated] = React.useState(false);
 
   const baseUrl = window.location.origin; // e.g. https://velvet-vault.netlify.app
-  const count = Math.min(Math.max(parseInt(tableCount) || 0, 1), 50);
+  const count = Math.min(Math.max(parseInt(tableCount) || 0, 1), 100);
 
   const qrUrl = (n) =>
     `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(`${baseUrl}?table=${n}`)}`;
