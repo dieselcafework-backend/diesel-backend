@@ -35,7 +35,7 @@ const sendOrderPush = async (order) => {
     if (!subs.length) return;
 
     const payload = JSON.stringify({
-      title: '🛎️ New Order — Velvet Vault',
+      title: '🛎️ New Order — ' + (order.orderType === 'takeaway' ? 'Takeaway' : `Table ${order.tableNumber}`),
       body: `${order.orderType === 'takeaway' ? '🥡 Takeaway' : `🪑 Table ${order.tableNumber}`} · ${order.customerName} · ₹${order.totalAmount}`,
       orderId: String(order._id),
     });
@@ -211,14 +211,54 @@ router.get('/history', protect, async (req, res) => {
       .filter(o => o.orderType === 'takeaway')
       .reduce((sum, o) => sum + o.totalAmount, 0);
 
+    // ── NEW: payment method breakdown for the period ──────────────────────
+    const paymentBreakdown = { Cash: 0, UPI: 0, Card: 0, Unrecorded: 0 };
+    nonCancelled.forEach((o) => {
+      if ((o.orderType || 'dine-in') === 'dine-in') {
+        if (o.dineInPaymentMethod === 'Cash') paymentBreakdown.Cash += o.totalAmount;
+        else if (o.dineInPaymentMethod === 'UPI') paymentBreakdown.UPI += o.totalAmount;
+        else if (o.dineInPaymentMethod === 'Card') paymentBreakdown.Card += o.totalAmount;
+        else paymentBreakdown.Unrecorded += o.totalAmount;
+      } else {
+        if (o.paymentMethod === 'upi' || o.paymentMethod === 'razorpay') paymentBreakdown.UPI += o.totalAmount;
+        else if (o.paymentMethod === 'debit-card' || o.paymentMethod === 'credit-card') paymentBreakdown.Card += o.totalAmount;
+        else paymentBreakdown.Unrecorded += o.totalAmount;
+      }
+    });
+
+    // ── Counts needed by frontend summary cards ────────────────────────────
+    const dineInCount   = nonCancelled.filter((o) => (o.orderType || 'dine-in') === 'dine-in').length;
+    const takeawayCount = nonCancelled.filter((o) => o.orderType === 'takeaway').length;
+
+    // ── Top items in period (frontend expects this) ────────────────────────
+    const itemMap = {};
+    nonCancelled.forEach((o) => {
+      o.items.forEach((it) => {
+        if (!itemMap[it.name]) itemMap[it.name] = { qty: 0, revenue: 0 };
+        itemMap[it.name].qty     += it.quantity;
+        itemMap[it.name].revenue += it.price * it.quantity;
+      });
+    });
+    const topItems = Object.entries(itemMap)
+      .sort((a, b) => b[1].qty - a[1].qty)
+      .slice(0, 10)
+      .map(([name, d]) => ({ name, qty: d.qty, revenue: d.revenue }));
+
     res.json({
       from,
       to,
-      totalOrders: orders.length,
-      totalRevenue,
-      takeawayRevenue,
-      dineInRevenue: totalRevenue - takeawayRevenue,
       orders,
+      // 'summary' wraps everything the frontend's history card UI expects
+      summary: {
+        totalOrders:   orders.length,
+        totalSales:    totalRevenue,
+        dineInCount,
+        takeawayCount,
+        dineInSales:   totalRevenue - takeawayRevenue,
+        takeawaySales: takeawayRevenue,
+        paymentBreakdown,
+        topItems,
+      },
     });
   } catch (err) {
     console.error('Order history error:', err);
@@ -244,10 +284,27 @@ router.get('/daily-stats', protect, async (req, res) => {
     const takeawaySales = orders.filter((o) => o.orderType === 'takeaway').reduce((sum, o) => sum + o.totalAmount, 0);
     const pendingVerification = orders.filter((o) => o.paymentStatus === 'pending_verification').length;
 
+    // ── NEW: payment method breakdown (dine-in Cash/UPI/Card + takeaway methods) ──
+    const paymentBreakdown = { Cash: 0, UPI: 0, Card: 0, Unrecorded: 0 };
+    orders.forEach((o) => {
+      if ((o.orderType || 'dine-in') === 'dine-in') {
+        if (o.dineInPaymentMethod === 'Cash') paymentBreakdown.Cash += o.totalAmount;
+        else if (o.dineInPaymentMethod === 'UPI') paymentBreakdown.UPI += o.totalAmount;
+        else if (o.dineInPaymentMethod === 'Card') paymentBreakdown.Card += o.totalAmount;
+        else paymentBreakdown.Unrecorded += o.totalAmount;
+      } else {
+        // Takeaway — map existing paymentMethod to the same buckets
+        if (o.paymentMethod === 'upi' || o.paymentMethod === 'razorpay') paymentBreakdown.UPI += o.totalAmount;
+        else if (o.paymentMethod === 'debit-card' || o.paymentMethod === 'credit-card') paymentBreakdown.Card += o.totalAmount;
+        else paymentBreakdown.Unrecorded += o.totalAmount;
+      }
+    });
+
     res.json({
       totalSales, totalOrders,
       dineInOrders, takeawayOrders, takeawaySales,
       pendingVerification,
+      paymentBreakdown,   // ← NEW
       orders,
     });
   } catch (err) {
@@ -258,7 +315,7 @@ router.get('/daily-stats', protect, async (req, res) => {
 // ── PUT /orders/:id — admin only ──────────────────────────────────────────────
 router.put('/:id', protect, async (req, res) => {
   try {
-    const { status, paymentStatus } = req.body;
+    const { status, paymentStatus, dineInPaymentMethod } = req.body;
     const updates = {};
 
     if (status) {
@@ -275,6 +332,15 @@ router.put('/:id', protect, async (req, res) => {
         return res.status(400).json({ message: 'Invalid paymentStatus value.' });
       }
       updates.paymentStatus = paymentStatus;
+    }
+
+    // ── NEW: dine-in payment method (Cash / UPI / Card) ────────────────────
+    if (dineInPaymentMethod !== undefined) {
+      const validDineInMethods = ['Cash', 'UPI', 'Card', ''];
+      if (!validDineInMethods.includes(dineInPaymentMethod)) {
+        return res.status(400).json({ message: 'Invalid dineInPaymentMethod value.' });
+      }
+      updates.dineInPaymentMethod = dineInPaymentMethod;
     }
 
     if (Object.keys(updates).length === 0) {

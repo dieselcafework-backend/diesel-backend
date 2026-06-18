@@ -163,7 +163,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
       try {
         const res = await api.post('/orders', {
           customerName: name.trim(),
-          tableNumber: '',
+          tableNumber: table.trim(),
           orderType: 'dine-in',
           note: note.trim(),
           items: items.map((i) => ({ menuItem: i._id, name: i.name, price: i.price, quantity: i.quantity, veg: i.veg })),
@@ -177,7 +177,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
         saveMyOrder({
           orderId: res.data._id,
           customerName: name.trim(),
-          tableNumber: 'N/A',
+          tableNumber: '' + table.trim(),
           orderType: 'dine-in',
           items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, veg: i.veg })),
           totalAmount,
@@ -227,7 +227,7 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
       saveMyOrder({
         orderId: res.data._id,
         customerName: name.trim(),
-        tableNumber: 'Takeaway',
+        tableNumber: '' + table.trim(),
         orderType: 'takeaway',
         items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, veg: i.veg })),
         totalAmount,

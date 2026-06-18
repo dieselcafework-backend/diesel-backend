@@ -238,10 +238,11 @@ const AdminDashboard = () => {
   // Confirm dialogs
   const [deleteMenuConfirm, setDeleteMenuConfirm] = useState(null);   // menu item id
   const [orderDeleteModal, setOrderDeleteModal] = useState(null);     // order object — NEW 2-option modal
+  const [paymentPickerOrder, setPaymentPickerOrder] = useState(null); // order pending payment-method selection before completing
   const [clearAllConfirm, setClearAllConfirm] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
-  const [logoPreview, setLogoPreview] = useState(localStorage.getItem('velvet_vault_logo_url') || '');
+  const [logoPreview, setLogoPreview] = useState(localStorage.getItem('diesel_cafe_logo_url') || '');
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -350,11 +351,11 @@ const AdminDashboard = () => {
       setLogoUploading(true);
       try {
         await api.put('/auth/logo', { logoUrl: base64 });
-        localStorage.setItem('velvet_vault_logo_url', base64);
+        localStorage.setItem('diesel_cafe_logo_url', base64);
         toast.success('Logo updated! Refresh to see it in navbar.', { icon: '🖼️' });
       } catch (err) {
         toast.error(err.response?.data?.message || 'Failed to upload logo.');
-        setLogoPreview(localStorage.getItem('velvet_vault_logo_url') || '');
+        setLogoPreview(localStorage.getItem('diesel_cafe_logo_url') || '');
       } finally {
         setLogoUploading(false);
       }
@@ -366,7 +367,7 @@ const AdminDashboard = () => {
     setLogoUploading(true);
     try {
       await api.put('/auth/logo', { logoUrl: '' });
-      localStorage.removeItem('velvet_vault_logo_url');
+      localStorage.removeItem('diesel_cafe_logo_url');
       setLogoPreview('');
       toast.success('Logo removed.');
     } catch (_) { toast.error('Failed to remove logo.'); }
@@ -670,13 +671,29 @@ const AdminDashboard = () => {
   }, [authReady, fetchOrders, fetchStats]);
 
   // ── Order status update ───────────────────────────────────────────────────────
-  const updateOrderStatus = async (id, status) => {
+  const updateOrderStatus = async (id, status, order) => {
+    // Intercept: dine-in order being marked Completed → ask payment method first
+    if (status === 'completed' && order && (order.orderType || 'dine-in') === 'dine-in' && !order.dineInPaymentMethod) {
+      setPaymentPickerOrder(order);
+      return;
+    }
     try {
       await api.put(`/orders/${id}`, { status });
       setOrders((prev) => prev.map((o) => o._id === id ? { ...o, status } : o));
       fetchStats();
       toast.success(`Order marked as ${STATUS_LABELS[status]}`);
     } catch (_) { toast.error('Failed to update status'); }
+  };
+
+  // ── Confirm payment method then mark order Completed ──────────────────────
+  const confirmDineInPayment = async (order, method) => {
+    try {
+      await api.put(`/orders/${order._id}`, { status: 'completed', dineInPaymentMethod: method });
+      setOrders((prev) => prev.map((o) => o._id === order._id ? { ...o, status: 'completed', dineInPaymentMethod: method } : o));
+      fetchStats();
+      toast.success(`Order completed — paid via ${method}`);
+    } catch (_) { toast.error('Failed to update order'); }
+    finally { setPaymentPickerOrder(null); }
   };
 
   // ── Verify takeaway payment ───────────────────────────────────────────────────
@@ -1162,6 +1179,22 @@ const AdminDashboard = () => {
                   </div>
                 )}
 
+                {/* Dine-in payment method badge — shown once order is completed */}
+                {(order.orderType || 'dine-in') === 'dine-in' && order.dineInPaymentMethod && (
+                  <div className={`px-4 pb-2.5 border-t ${C.border} pt-2 flex items-center gap-2`}>
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold"
+                      style={{
+                        background: order.dineInPaymentMethod === 'Cash' ? 'rgba(5,150,105,0.1)' : order.dineInPaymentMethod === 'UPI' ? 'rgba(0,123,139,0.1)' : 'rgba(124,58,237,0.1)',
+                        color:      order.dineInPaymentMethod === 'Cash' ? '#059669' : order.dineInPaymentMethod === 'UPI' ? '#007B8B' : '#7c3aed',
+                        border: `1px solid ${order.dineInPaymentMethod === 'Cash' ? 'rgba(5,150,105,0.25)' : order.dineInPaymentMethod === 'UPI' ? 'rgba(0,123,139,0.25)' : 'rgba(124,58,237,0.25)'}`,
+                      }}
+                    >
+                      {order.dineInPaymentMethod === 'Cash' ? '💵' : order.dineInPaymentMethod === 'UPI' ? '📱' : '💳'} Paid via {order.dineInPaymentMethod}
+                    </span>
+                  </div>
+                )}
+
                 {/* Takeaway — pickup token, UTR, payment method, verify button */}
                 {order.orderType === 'takeaway' && (
                   <div className={`px-4 pb-3 border-t ${C.border} pt-2 flex flex-wrap gap-2 items-center`}>
@@ -1208,7 +1241,7 @@ const AdminDashboard = () => {
                 {/* Actions */}
                 <div className={`border-t ${C.border} px-4 py-2.5 flex gap-2`}>
                   {order.status !== 'completed' && (
-                    <button onClick={() => updateOrderStatus(order._id, NEXT_STATUS[order.status])}
+                    <button onClick={() => updateOrderStatus(order._id, NEXT_STATUS[order.status], order)}
                       className="flex-1 py-2 rounded-xl text-xs font-black tracking-wide uppercase transition-all active:scale-[0.98] text-white"
                       style={{ background: order.status === 'pending' ? `linear-gradient(135deg, var(--admin-btn-accept), #16a34a)` : order.status === 'accepted' ? `linear-gradient(135deg, var(--admin-btn-cook), #1d4ed8)` : order.status === 'preparing' ? `linear-gradient(135deg, var(--admin-btn-ready), #047857)` : `linear-gradient(135deg, var(--admin-btn-complete), #4b5563)` }}>
                       {NEXT_LABELS[order.status]}
@@ -1642,6 +1675,36 @@ const AdminDashboard = () => {
                               </div>
                             ))}
                           </div>
+                          {historySummary?.paymentBreakdown && (
+                            <div className={`${C.card} rounded-2xl p-4 shadow-sm`}>
+                              <h4 className={`font-black ${C.text} text-sm mb-3`}>💰 Payment Breakdown</h4>
+                              <div className="space-y-2">
+                                {[
+                                  { key: 'Cash', label: 'Cash', icon: '💵', color: '#059669' },
+                                  { key: 'UPI', label: 'UPI', icon: '📱', color: '#007B8B' },
+                                  { key: 'Card', label: 'Card', icon: '💳', color: '#7c3aed' },
+                                  { key: 'Unrecorded', label: 'Unrecorded', icon: '❔', color: '#9ca3af' },
+                                ].filter((p) => historySummary.paymentBreakdown[p.key] > 0).map((p) => {
+                                  const max = Math.max(...Object.values(historySummary.paymentBreakdown), 1);
+                                  return (
+                                    <div key={p.key} className="flex items-center gap-3">
+                                      <span className="text-sm flex-shrink-0">{p.icon}</span>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between mb-0.5">
+                                          <span className={`text-xs font-bold ${C.text}`}>{p.label}</span>
+                                          <span className="text-xs font-black" style={{ color: p.color }}>₹{historySummary.paymentBreakdown[p.key].toLocaleString()}</span>
+                                        </div>
+                                        <div className="h-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                                          <div className="h-1.5 rounded-full transition-all" style={{ width: `${(historySummary.paymentBreakdown[p.key] / max) * 100}%`, background: p.color }} />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
                           {couponEntries.length > 0 && (
                             <div className={`${C.card} rounded-2xl p-4 shadow-sm`}>
                               <div className="flex items-center justify-between mb-3">
@@ -1748,6 +1811,12 @@ const AdminDashboard = () => {
                               )}
                               {order.couponCode && (
                                 <p className="text-[10px] font-black mt-0.5" style={{ color: '#b45309', fontFamily: 'monospace' }}>🏷️ {order.couponCode}</p>
+                              )}
+                              {(order.orderType || 'dine-in') === 'dine-in' && order.dineInPaymentMethod && (
+                                <p className="text-[10px] font-bold mt-0.5"
+                                  style={{ color: order.dineInPaymentMethod === 'Cash' ? '#059669' : order.dineInPaymentMethod === 'UPI' ? '#007B8B' : '#7c3aed' }}>
+                                  {order.dineInPaymentMethod === 'Cash' ? '💵' : order.dineInPaymentMethod === 'UPI' ? '📱' : '💳'} {order.dineInPaymentMethod}
+                                </p>
                               )}
                             </div>
                           </div>
@@ -1935,6 +2004,44 @@ const AdminDashboard = () => {
               Cancel
             </button>
           </div>
+        </Modal>
+      )}
+
+      {/* ══ Dine-In Payment Method Picker ═══════════════════════════════════════ */}
+      {paymentPickerOrder && (
+        <Modal onClose={() => setPaymentPickerOrder(null)}>
+          <div className="text-4xl mb-3">💰</div>
+          <h3 className={`font-black ${C.text} text-base mb-1`}>How did they pay?</h3>
+          <p className={`${C.muted} text-sm mb-1`}>
+            <span className={`font-bold ${C.text}`}>{paymentPickerOrder.customerName}</span> · {paymentPickerOrder.tableNumber}
+          </p>
+          <p className="font-black text-lg mb-5" style={{ color: '#940901' }}>₹{paymentPickerOrder.totalAmount}</p>
+
+          <div className="grid grid-cols-3 gap-2.5">
+            <button onClick={() => confirmDineInPayment(paymentPickerOrder, 'Cash')}
+              className="flex flex-col items-center gap-1.5 py-4 rounded-xl border-2 transition-all active:scale-95 hover:bg-green-50 dark:hover:bg-green-900/10"
+              style={{ borderColor: 'rgba(5,150,105,0.3)' }}>
+              <span className="text-2xl">💵</span>
+              <span className="text-xs font-black" style={{ color: '#059669' }}>Cash</span>
+            </button>
+            <button onClick={() => confirmDineInPayment(paymentPickerOrder, 'UPI')}
+              className="flex flex-col items-center gap-1.5 py-4 rounded-xl border-2 transition-all active:scale-95 hover:bg-cyan-50 dark:hover:bg-cyan-900/10"
+              style={{ borderColor: 'rgba(0,123,139,0.3)' }}>
+              <span className="text-2xl">📱</span>
+              <span className="text-xs font-black" style={{ color: '#007B8B' }}>UPI</span>
+            </button>
+            <button onClick={() => confirmDineInPayment(paymentPickerOrder, 'Card')}
+              className="flex flex-col items-center gap-1.5 py-4 rounded-xl border-2 transition-all active:scale-95 hover:bg-purple-50 dark:hover:bg-purple-900/10"
+              style={{ borderColor: 'rgba(124,58,237,0.3)' }}>
+              <span className="text-2xl">💳</span>
+              <span className="text-xs font-black" style={{ color: '#7c3aed' }}>Card</span>
+            </button>
+          </div>
+
+          <button onClick={() => setPaymentPickerOrder(null)}
+            className={`w-full mt-4 py-2.5 rounded-xl font-bold text-sm border-2 ${C.border} ${C.muted} hover:bg-gray-50 dark:hover:bg-gray-700 transition-all`}>
+            Cancel
+          </button>
         </Modal>
       )}
 

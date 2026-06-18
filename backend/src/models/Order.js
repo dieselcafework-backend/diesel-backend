@@ -53,6 +53,14 @@ const orderSchema = new mongoose.Schema(
       default: 'not_required',
     },
 
+    // ── Dine-in payment method — set by admin when marking order Completed ───
+    // '' means not yet recorded (e.g. order still in progress)
+    dineInPaymentMethod: {
+      type: String,
+      enum: ['Cash', 'UPI', 'Card', ''],
+      default: '',
+    },
+
     // ── Razorpay fields ──────────────────────────────────────────────────────
     paymentId:       { type: String, default: '' },   // Razorpay payment ID
     razorpayOrderId: { type: String, default: '' },   // Razorpay order ID

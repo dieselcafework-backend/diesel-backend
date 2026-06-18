@@ -166,6 +166,7 @@ const getExpenseAnalytics = async (req, res) => {
       monthTotal,
       yearTotal,
       periodSales,
+      periodOrdersForPayment,
     ] = await Promise.all([
 
       // Total expenses for selected period
@@ -206,10 +207,29 @@ const getExpenseAnalytics = async (req, res) => {
         { $match: { createdAt: dateFilter, status: { $ne: 'cancelled' } } },
         { $group: { _id: null, total: { $sum: '$totalAmount' } } },
       ]),
+
+      // ── NEW: sales orders for payment-method breakdown ──────────────────
+      Order.find({ createdAt: dateFilter, status: { $ne: 'cancelled' } })
+        .select('totalAmount orderType dineInPaymentMethod paymentMethod'),
     ]);
 
     const totalExpenses = periodExpenses[0]?.total || 0;
     const totalSales    = periodSales[0]?.total    || 0;
+
+    // ── NEW: payment method breakdown (Cash / UPI / Card / Unrecorded) ──────
+    const paymentBreakdown = { Cash: 0, UPI: 0, Card: 0, Unrecorded: 0 };
+    periodOrdersForPayment.forEach((o) => {
+      if ((o.orderType || 'dine-in') === 'dine-in') {
+        if (o.dineInPaymentMethod === 'Cash') paymentBreakdown.Cash += o.totalAmount;
+        else if (o.dineInPaymentMethod === 'UPI') paymentBreakdown.UPI += o.totalAmount;
+        else if (o.dineInPaymentMethod === 'Card') paymentBreakdown.Card += o.totalAmount;
+        else paymentBreakdown.Unrecorded += o.totalAmount;
+      } else {
+        if (o.paymentMethod === 'upi' || o.paymentMethod === 'razorpay') paymentBreakdown.UPI += o.totalAmount;
+        else if (o.paymentMethod === 'debit-card' || o.paymentMethod === 'credit-card') paymentBreakdown.Card += o.totalAmount;
+        else paymentBreakdown.Unrecorded += o.totalAmount;
+      }
+    });
 
     res.json({
       // Period summary
@@ -235,6 +255,14 @@ const getExpenseAnalytics = async (req, res) => {
 
       // Daily trend (for line chart)
       trend: trendRaw.map((t) => ({ date: t._id, total: Math.round(t.total) })),
+
+      // Payment method breakdown (Cash / UPI / Card) — NEW
+      paymentBreakdown: {
+        Cash:       Math.round(paymentBreakdown.Cash),
+        UPI:        Math.round(paymentBreakdown.UPI),
+        Card:       Math.round(paymentBreakdown.Card),
+        Unrecorded: Math.round(paymentBreakdown.Unrecorded),
+      },
     });
   } catch (err) {
     console.error('Expense analytics error:', err);
