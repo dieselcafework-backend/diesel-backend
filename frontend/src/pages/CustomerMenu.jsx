@@ -582,7 +582,7 @@ const CustomerMenu = () => {
               onClear={handleClearOrders}
             />
           )}
-          <OnboardingGuide />
+          {/* <OnboardingGuide /> */}
         </>
       )}
     </div>

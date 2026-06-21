@@ -39,10 +39,10 @@ module.exports = {
     'All Items',
     'Meals',
     'Snacks',
-    // 'Pasta & Maggie',
-    'Noodles',
+    'Salad & Soup',
+    // 'Noodles',
     'Beverages',
-    'Combos',
+    // 'Combos',
   ],
 
   // ── ③ ENVIRONMENT VARIABLES ──────────────────────────────────────
