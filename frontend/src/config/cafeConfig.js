@@ -53,9 +53,9 @@ export const cafeConfig = {
   // Shown to customers during the takeaway checkout UPI flow.
 
   contact: {
-    phone: '9696028522',    // for display in UPI payment flow (with country code, no +)
-    whatsapp: '9696028522',   // with country code, no + (for wa.me links)
-    upiId: '969608522@ybl',
+    phone: '+91 7755022226',    // for display in UPI payment flow (with country code, no +)
+    whatsapp: '917755022226',   // with country code, no + (for wa.me links)
+    upiId: '1234567890@exupi',
     upiName: 'Diesel cafe',
   },
 
@@ -116,9 +116,9 @@ export const cafeConfig = {
   colors: {
 
     // ── Customer UI ────────────────────────────────────────────────────────
-    primary: '#3a1a1e',   // navbar bg, cart header, category bar
+    primary: '#A21207',   // navbar bg, cart header, category bar
     primaryDark: '#982829',   // darker variant used in gradients/hover
-    primaryDeep: '#3a1a1e',   // add-to-cart button, quantity stepper bg
+    primaryDeep: '#A21207',   // add-to-cart button, quantity stepper bg
 
     // Gold accent
     accent: '#d6993c',   // icons, borders, order badge
@@ -128,18 +128,18 @@ export const cafeConfig = {
     // Sub-category filter pills
     pillActive: '#4e2c21',   // active pill bg
     pillActiveText: '#ffffff',
-    pillsub: '#ffffff',   // active pill bg
+    pillsub: '#D89D5D',   // active pill bg
     pillsubText: '#000000',
-    subbg: '#3a1a1ec3',   // active pill bg
+    subbg: '#D50801',   // active pill bg
 
     // Sup-category filter pills
-    pillsupActive: '#ffffff',   // active pill bg
+    pillsupActive: '#FFEB5B',   // active pill bg
     pillsupActiveText: '#1a1a1a',
     pillsup: '#ffffff00',   // active pill bg
     pillsupText: '#ffffffc0',
 
     // Order Model Colours
-    ordermodelbg: '#3a1a1e',
+    ordermodelbg: '#AE7B45',
     ordermodelbgtext: '#ffffff',
     ordermodelbgtextonsummery: '#4a262b',
     ordermodelbgmesseges: '#dcf309',
@@ -160,7 +160,7 @@ export const cafeConfig = {
     // Text
     textOnPrimary: '#ede8d0',   // text ON the red navbar / dark surfaces
     textBody: '#1a1a1a',   // main body text
-    textbodymainbg: '#f4eded',   // main body text
+    textbodymainbg: '#000000',   // main body text
     textMuted: '#6b6b4a',   // secondary / muted text
     textPrice: '#31603d',   // price display (green)
     textDesc: '#64690c',   // item description (olive)

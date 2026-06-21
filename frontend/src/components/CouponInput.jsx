@@ -100,7 +100,7 @@ const CouponInput = ({ cartTotal, onApply, onRemove, appliedCoupon }) => {
         </button>
       </div>
       {error && (
-        <p className="text-xs font-semibold" style={{ color: '#ef4444' }}>
+        <p className="text-xs font-semibold" style={{ color: 'var(--ordermodelbgmesseges)' }}>
           ⚠️ {error}
         </p>
       )}

@@ -532,7 +532,7 @@ const CustomerMenu = () => {
                 </p>
               </div>
             ) : (
-              <div className="bg-black bg-menu-section rounded-full mt-4 p-3 space-y-6" style={{ background: 'var(--primary)' }}>
+              <div className="bg-black bg-menu-section rounded-full mt-4 p-3 space-y-6" style={{ background: '#D89D5D' }}>
                 {Object.entries(groups).map(([subCat, items]) => (
                   <div key={subCat}>
                     {/* Section header */}
