@@ -77,7 +77,8 @@ router.post('/', orderWriteLimiter, requireShopOpen, async (req, res) => {
     const {
       customerName, tableNumber, items, note,
       orderType, phoneNumber, utrNumber,
-      paymentMethod, // ← NEW
+      paymentMethod,
+      couponCode, discountAmount, originalAmount, // ← coupon fields
     } = req.body;
 
     if (!customerName || !tableNumber || !items || items.length === 0) {
@@ -100,7 +101,14 @@ router.post('/', orderWriteLimiter, requireShopOpen, async (req, res) => {
       }
     }
 
-    const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    // If a coupon was applied, trust the frontend's discounted totalAmount.
+    // Otherwise recalculate from items to prevent tampering.
+    const hasCoupon = couponCode && typeof discountAmount === 'number' && discountAmount > 0;
+    const computedTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const totalAmount = hasCoupon
+      ? Math.max(0, computedTotal - discountAmount)  // server-verified discount
+      : computedTotal;
+
     const pickupToken = isTakeaway ? await generatePickupToken() : '';
 
     // Validate paymentMethod — default to 'upi' for takeaway if not provided
@@ -119,8 +127,12 @@ router.post('/', orderWriteLimiter, requireShopOpen, async (req, res) => {
       note: note || '',
       paymentStatus: isTakeaway ? 'pending_verification' : 'not_required',
       utrNumber: isTakeaway ? utrNumber.trim() : '',
-      paymentMethod: resolvedPaymentMethod, // ← NEW
+      paymentMethod: resolvedPaymentMethod,
       pickupToken,
+      // ── Coupon ────────────────────────────────────────────────────────────
+      couponCode:     hasCoupon ? couponCode.trim().toUpperCase() : '',
+      discountAmount: hasCoupon ? discountAmount : 0,
+      originalAmount: hasCoupon ? computedTotal : 0,
     });
 
     await order.save();

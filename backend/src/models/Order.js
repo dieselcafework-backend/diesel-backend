@@ -66,6 +66,11 @@ const orderSchema = new mongoose.Schema(
     razorpayOrderId: { type: String, default: '' },   // Razorpay order ID
 
     pickupToken: { type: String, default: '' },
+
+    // ── Coupon / Discount ────────────────────────────────────────────────────
+    couponCode:     { type: String, default: '' },   // e.g. "SAVE20"
+    discountAmount: { type: Number, default: 0 },    // e.g. 60 (rupees saved)
+    originalAmount: { type: Number, default: 0 },    // pre-discount total
   },
   { timestamps: true }
 );

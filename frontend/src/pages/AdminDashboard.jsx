@@ -1809,9 +1809,6 @@ const AdminDashboard = () => {
                               ) : (
                                 <p className="font-black text-sm" style={{ color: '#940901' }}>₹{order.totalAmount}</p>
                               )}
-                              {order.couponCode && (
-                                <p className="text-[10px] font-black mt-0.5" style={{ color: '#b45309', fontFamily: 'monospace' }}>🏷️ {order.couponCode}</p>
-                              )}
                               {(order.orderType || 'dine-in') === 'dine-in' && order.dineInPaymentMethod && (
                                 <p className="text-[10px] font-bold mt-0.5"
                                   style={{ color: order.dineInPaymentMethod === 'Cash' ? '#059669' : order.dineInPaymentMethod === 'UPI' ? '#007B8B' : '#7c3aed' }}>
@@ -1820,6 +1817,40 @@ const AdminDashboard = () => {
                               )}
                             </div>
                           </div>
+
+                          {/* Coupon / Discount row — history */}
+                          {order.couponCode && (
+                            <div className={`px-4 pb-2.5 border-t ${C.border} pt-2 flex items-center justify-between gap-2 flex-wrap`}>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black tracking-widest"
+                                  style={{
+                                    background: 'rgba(214,153,60,0.12)',
+                                    color: '#b45309',
+                                    border: '1px solid rgba(214,153,60,0.35)',
+                                    fontFamily: 'monospace',
+                                  }}
+                                >
+                                  🏷️ {order.couponCode}
+                                </span>
+                                {order.discountAmount > 0 && (
+                                  <span
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold"
+                                    style={{ background: 'rgba(5,150,105,0.08)', color: '#059669', border: '1px solid rgba(5,150,105,0.2)' }}
+                                  >
+                                    − ₹{order.discountAmount} saved
+                                  </span>
+                                )}
+                              </div>
+                              {order.originalAmount > 0 && order.originalAmount !== order.totalAmount && (
+                                <span className={`text-xs ${C.muted}`}>
+                                  <span style={{ textDecoration: 'line-through' }}>₹{order.originalAmount}</span>
+                                  {' → '}
+                                  <span className="font-black" style={{ color: '#059669' }}>₹{order.totalAmount}</span>
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
