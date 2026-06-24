@@ -191,12 +191,12 @@ const menuData = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // SHAKES & SOUPS
+  // SHAKES (in Beverages) · SALADS & SOUPS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // ─── Shakes ───────────────────────────────────────────────────────────────
+  // ─── Shakes (subCategory of Beverages) ─────────────────────────────────────
   {
-    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    superCategory: "Beverages", subCategory: "Shakes",
     name: "Cold Coffee",
     description: "Rich, frothy cold coffee blended to café perfection.",
     price: 90, halfPrice: null, fullPrice: null,
@@ -204,7 +204,7 @@ const menuData = [
     image: P("1193335"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    superCategory: "Beverages", subCategory: "Shakes",
     name: "Cold Coffee with Ice Cream",
     description: "Classic cold coffee crowned with a generous scoop of vanilla ice cream.",
     price: 120, halfPrice: null, fullPrice: null,
@@ -212,7 +212,7 @@ const menuData = [
     image: P("1193335"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    superCategory: "Beverages", subCategory: "Shakes",
     name: "Oreo Shake",
     description: "Thick, dreamy milkshake blended with crushed Oreo cookies.",
     price: 100, halfPrice: null, fullPrice: null,
@@ -220,7 +220,7 @@ const menuData = [
     image: P("1092730"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    superCategory: "Beverages", subCategory: "Shakes",
     name: "Kitkat Shake",
     description: "Indulgent chocolate milkshake blended with crunchy KitKat bars.",
     price: 100, halfPrice: null, fullPrice: null,
@@ -228,7 +228,7 @@ const menuData = [
     image: P("3727255"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    superCategory: "Beverages", subCategory: "Shakes",
     name: "Chocolate Shake",
     description: "Pure chocolate bliss — thick, creamy and deeply satisfying.",
     price: 100, halfPrice: null, fullPrice: null,
@@ -236,7 +236,7 @@ const menuData = [
     image: P("3727249"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    superCategory: "Beverages", subCategory: "Shakes",
     name: "Mango Shake",
     description: "Real mango blended into a thick, refreshing summer shake.",
     price: 90, halfPrice: null, fullPrice: null,
@@ -244,7 +244,7 @@ const menuData = [
     image: P("3625372"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    superCategory: "Beverages", subCategory: "Shakes",
     name: "Mix Fruit Shake",
     description: "A vibrant blend of seasonal fresh fruits into one refreshing glass.",
     price: 150, halfPrice: null, fullPrice: null,
@@ -252,7 +252,7 @@ const menuData = [
     image: P("3625372"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    superCategory: "Beverages", subCategory: "Shakes",
     name: "Strawberry Shake",
     description: "Sweet, pink and luscious — a classic strawberry milkshake.",
     price: 100, halfPrice: null, fullPrice: null,
@@ -260,9 +260,9 @@ const menuData = [
     image: P("3727250"),
   },
 
-  // ─── Soups ────────────────────────────────────────────────────────────────
+  // ─── Soups (subCategory of Salads & Soups) ──────────────────────────────────
   {
-    superCategory: "Shakes & Soups", subCategory: "Soups",
+    superCategory: "Salads & Soups", subCategory: "Soups",
     name: "Veg Sweet Corn Soup",
     description: "Creamy, comforting sweet corn soup with a hint of pepper.",
     price: 80, halfPrice: null, fullPrice: null,
@@ -270,7 +270,7 @@ const menuData = [
     image: P("699953"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Soups",
+    superCategory: "Salads & Soups", subCategory: "Soups",
     name: "Veg Manchow Soup",
     description: "Thick, spicy Indo-Chinese soup loaded with vegetables and crispy noodles.",
     price: 80, halfPrice: null, fullPrice: null,
@@ -278,7 +278,7 @@ const menuData = [
     image: P("699953"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Soups",
+    superCategory: "Salads & Soups", subCategory: "Soups",
     name: "Veg Hot & Sour Soup",
     description: "Bold, tangy soup with the perfect balance of heat and sourness.",
     price: 80, halfPrice: null, fullPrice: null,
@@ -286,7 +286,7 @@ const menuData = [
     image: P("699953"),
   },
   {
-    superCategory: "Shakes & Soups", subCategory: "Soups",
+    superCategory: "Salads & Soups", subCategory: "Soups",
     name: "Tomato Soup",
     description: "Rich, velvety tomato soup with fresh basil and a swirl of cream.",
     price: 80, halfPrice: null, fullPrice: null,
@@ -488,12 +488,12 @@ const menuData = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // MAIN COURSE & CHINESE
+  // MAIN COURSE · CHINESE
   // ═══════════════════════════════════════════════════════════════════════════
 
   // ─── Momo Special ─────────────────────────────────────────────────────────
   {
-    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    superCategory: "Main Course", subCategory: "Momo Special",
     name: "Steam Veg Momos (8 pcs)",
     description: "Steamed dumplings packed with seasoned vegetables, served with chutney.",
     price: 50, halfPrice: null, fullPrice: null,
@@ -501,7 +501,7 @@ const menuData = [
     image: P("18803174"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    superCategory: "Main Course", subCategory: "Momo Special",
     name: "Steam Paneer Momos (8 pcs)",
     description: "Delicate steamed dumplings filled with spiced paneer and herbs.",
     price: 70, halfPrice: null, fullPrice: null,
@@ -509,7 +509,7 @@ const menuData = [
     image: P("28445589"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    superCategory: "Main Course", subCategory: "Momo Special",
     name: "Soup Momos (6 pcs)",
     description: "Momos served in a flavourful, aromatic soup broth — warming and satisfying.",
     price: 80, halfPrice: null, fullPrice: null,
@@ -517,7 +517,7 @@ const menuData = [
     image: P("3926123"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    superCategory: "Main Course", subCategory: "Momo Special",
     name: "Jhol Momos (6 pcs)",
     description: "Nepali-style momos bathed in a spicy, tangy jhol achar sauce.",
     price: 100, halfPrice: null, fullPrice: null,
@@ -525,7 +525,7 @@ const menuData = [
     image: P("28445593"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    superCategory: "Main Course", subCategory: "Momo Special",
     name: "Afgani Momos (6 pcs)",
     description: "Momos in a rich, creamy white Afghani sauce — truly indulgent.",
     price: 120, halfPrice: null, fullPrice: null,
@@ -535,7 +535,7 @@ const menuData = [
 
   // ─── Tikka & Kebab ────────────────────────────────────────────────────────
   {
-    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    superCategory: "Main Course", subCategory: "Tikka & Kebab",
     name: "Paneer Tikka",
     description: "Char-grilled marinated paneer cubes with bell peppers and onions.",
     price: 300, halfPrice: null, fullPrice: null,
@@ -543,7 +543,7 @@ const menuData = [
     image: P("28674541"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    superCategory: "Main Course", subCategory: "Tikka & Kebab",
     name: "Beetroot Kebab",
     description: "Vibrant beetroot kebabs, spiced and grilled to smoky perfection.",
     price: 200, halfPrice: null, fullPrice: null,
@@ -551,7 +551,7 @@ const menuData = [
     image: P("12737816"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    superCategory: "Main Course", subCategory: "Tikka & Kebab",
     name: "Chickpea Kebab",
     description: "Protein-rich chickpea kebabs with a crispy outer crust.",
     price: 200, halfPrice: null, fullPrice: null,
@@ -559,7 +559,7 @@ const menuData = [
     image: P("12737810"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    superCategory: "Main Course", subCategory: "Tikka & Kebab",
     name: "Crispy Corn Kebab",
     description: "Golden fried corn kebabs with herbs and a crunchy bite.",
     price: 250, halfPrice: null, fullPrice: null,
@@ -567,7 +567,7 @@ const menuData = [
     image: P("28674541"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    superCategory: "Main Course", subCategory: "Tikka & Kebab",
     name: "Crispy Baby Corn",
     description: "Crunchy battered baby corn, fried golden and flavour-packed.",
     price: 250, halfPrice: null, fullPrice: null,
@@ -577,7 +577,7 @@ const menuData = [
 
   // ─── Noodles & Rice ───────────────────────────────────────────────────────
   {
-    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    superCategory: "Chinese", subCategory: "Noodles & Rice",
     name: "Veg Chowmein",
     description: "Wok-tossed noodles with fresh vegetables and fragrant seasoning.",
     price: 130, halfPrice: null, fullPrice: null,
@@ -585,7 +585,7 @@ const menuData = [
     image: P("3026808"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    superCategory: "Chinese", subCategory: "Noodles & Rice",
     name: "Paneer Chowmein",
     description: "Stir-fried noodles elevated with soft, spiced paneer cubes.",
     price: 150, halfPrice: null, fullPrice: null,
@@ -593,7 +593,7 @@ const menuData = [
     image: P("31783383"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    superCategory: "Chinese", subCategory: "Noodles & Rice",
     name: "Hakka Noodles",
     description: "Classic Hakka-style noodles tossed with vegetables and soy sauce.",
     price: 150, halfPrice: null, fullPrice: null,
@@ -601,7 +601,7 @@ const menuData = [
     image: P("2347311"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    superCategory: "Chinese", subCategory: "Noodles & Rice",
     name: "Veg Fried Rice",
     description: "Wok-tossed rice with fresh vegetables and fragrant seasoning.",
     price: 150, halfPrice: null, fullPrice: null,
@@ -609,7 +609,7 @@ const menuData = [
     image: P("723198"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    superCategory: "Chinese", subCategory: "Noodles & Rice",
     name: "Paneer Fried Rice",
     description: "Classic fried rice elevated with fresh paneer cubes and aromatic spices.",
     price: 250, halfPrice: null, fullPrice: null,
@@ -617,7 +617,7 @@ const menuData = [
     image: P("9609859"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    superCategory: "Chinese", subCategory: "Noodles & Rice",
     name: "Schezwan Fried Rice",
     description: "Bold, fiery Schezwan sauce meets perfectly fried rice for a spicy treat.",
     price: 250, halfPrice: null, fullPrice: null,
@@ -627,7 +627,7 @@ const menuData = [
 
   // ─── Chinese Starters ─────────────────────────────────────────────────────
   {
-    superCategory: "Main Course & Chinese", subCategory: "Chinese Starters",
+    superCategory: "Chinese", subCategory: "Chinese Starters",
     name: "Veg Manchurian (Dry/Gravy)",
     description: "Crispy vegetable balls tossed in a tangy, spicy sauce — choose Dry or Gravy.",
     price: 180, halfPrice: null, fullPrice: null,
@@ -635,7 +635,7 @@ const menuData = [
     image: P("29631468"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Chinese Starters",
+    superCategory: "Chinese", subCategory: "Chinese Starters",
     name: "Paneer Manchurian (Dry/Gravy)",
     description: "Soft paneer cubes in a rich Manchurian sauce — choose Dry or Gravy.",
     price: 200, halfPrice: null, fullPrice: null,
@@ -643,7 +643,7 @@ const menuData = [
     image: P("29631461"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Chinese Starters",
+    superCategory: "Chinese", subCategory: "Chinese Starters",
     name: "Paneer Chilli (Dry/Gravy)",
     description: "Juicy paneer tossed with bell peppers and chilli sauce — choose Dry or Gravy.",
     price: 250, halfPrice: null, fullPrice: null,
@@ -651,7 +651,7 @@ const menuData = [
     image: P("29631461"),
   },
   {
-    superCategory: "Main Course & Chinese", subCategory: "Chinese Starters",
+    superCategory: "Chinese", subCategory: "Chinese Starters",
     name: "Honey Chilli Potato",
     description: "Crispy potato strips glazed with honey chilli sauce — sweet, spicy & addictive.",
     price: 150, halfPrice: null, fullPrice: null,
@@ -660,12 +660,12 @@ const menuData = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // PIZZA, FRIES & SALADS
+  // PIZZA & FRIES (in Snacks) · SALADS & SOUPS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // ─── Pizza ────────────────────────────────────────────────────────────────
+  // ─── Pizza (subCategory of Snacks) ─────────────────────────────────────────
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Pizza",
+    superCategory: "Snacks", subCategory: "Pizza",
     name: "Margherita Pizza",
     description: "Classic cheese pizza with a rich tomato base — timeless and simple.",
     price: 200, halfPrice: null, fullPrice: null,
@@ -673,7 +673,7 @@ const menuData = [
     image: P("825661"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Pizza",
+    superCategory: "Snacks", subCategory: "Pizza",
     name: "Onion & Capsicum Pizza",
     description: "Loaded with fresh onions and crunchy capsicum on a cheesy base.",
     price: 250, halfPrice: null, fullPrice: null,
@@ -681,7 +681,7 @@ const menuData = [
     image: P("1146760"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Pizza",
+    superCategory: "Snacks", subCategory: "Pizza",
     name: "Paneer Pizza",
     description: "Spiced paneer chunks generously topped over melted cheese.",
     price: 300, halfPrice: null, fullPrice: null,
@@ -689,7 +689,7 @@ const menuData = [
     image: P("825661"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Pizza",
+    superCategory: "Snacks", subCategory: "Pizza",
     name: "Farmhouse Pizza",
     description: "Loaded veggie pizza with onions, capsicum, tomato, corn and olives.",
     price: 400, halfPrice: null, fullPrice: null,
@@ -697,9 +697,9 @@ const menuData = [
     image: P("1146760"),
   },
 
-  // ─── Fries ────────────────────────────────────────────────────────────────
+  // ─── Fries (subCategory of Snacks) ─────────────────────────────────────────
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Fries",
+    superCategory: "Snacks", subCategory: "Fries",
     name: "Salted Fries",
     description: "Classic golden crispy fries, perfectly salted.",
     price: 70, halfPrice: null, fullPrice: null,
@@ -707,7 +707,7 @@ const menuData = [
     image: P("1893555"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Fries",
+    superCategory: "Snacks", subCategory: "Fries",
     name: "Peri-Peri Fries",
     description: "Crispy fries dusted with spicy peri-peri seasoning.",
     price: 90, halfPrice: null, fullPrice: null,
@@ -715,7 +715,7 @@ const menuData = [
     image: P("2097090"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Fries",
+    superCategory: "Snacks", subCategory: "Fries",
     name: "Cheese Fries",
     description: "Golden fries smothered in rich melted cheese sauce.",
     price: 120, halfPrice: null, fullPrice: null,
@@ -723,9 +723,9 @@ const menuData = [
     image: P("4109072"),
   },
 
-  // ─── Salads ───────────────────────────────────────────────────────────────
+  // ─── Salads (subCategory of Salads & Soups) ─────────────────────────────────
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    superCategory: "Salads & Soups", subCategory: "Salads",
     name: "Fruit Chaat",
     description: "Refreshing mix of seasonal fruits tossed with chaat masala.",
     price: 100, halfPrice: null, fullPrice: null,
@@ -733,7 +733,7 @@ const menuData = [
     image: P("3625372"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    superCategory: "Salads & Soups", subCategory: "Salads",
     name: "Fruit Custard",
     description: "Chilled creamy custard loaded with fresh seasonal fruits.",
     price: 150, halfPrice: null, fullPrice: null,
@@ -741,7 +741,7 @@ const menuData = [
     image: P("1092730"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    superCategory: "Salads & Soups", subCategory: "Salads",
     name: "Fruit Salad with Ice Cream",
     description: "Fresh fruit salad topped with a generous scoop of vanilla ice cream.",
     price: 200, halfPrice: null, fullPrice: null,
@@ -749,7 +749,7 @@ const menuData = [
     image: P("3727250"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    superCategory: "Salads & Soups", subCategory: "Salads",
     name: "Cucumber Salad",
     description: "Light, crisp cucumber salad with a refreshing tangy dressing.",
     price: 100, halfPrice: null, fullPrice: null,
@@ -757,7 +757,7 @@ const menuData = [
     image: P("699953"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    superCategory: "Salads & Soups", subCategory: "Salads",
     name: "Paneer & Veggie Salad",
     description: "Fresh vegetables and soft paneer cubes in a wholesome salad bowl.",
     price: 150, halfPrice: null, fullPrice: null,
@@ -765,7 +765,7 @@ const menuData = [
     image: P("12737816"),
   },
   {
-    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    superCategory: "Salads & Soups", subCategory: "Salads",
     name: "Soya Chunks Salad",
     description: "Protein-packed soya chunks tossed with fresh vegetables and herbs.",
     price: 190, halfPrice: null, fullPrice: null,

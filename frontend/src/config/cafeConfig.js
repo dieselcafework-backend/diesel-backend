@@ -92,7 +92,7 @@ export const cafeConfig = {
     'Snacks',
     'Pasta & Macaroni',
     'Main Course',
-    'Chinese ',
+    'Chinese',
     'Salads & Soups',
   ],
 
