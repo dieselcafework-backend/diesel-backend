@@ -37,12 +37,12 @@ module.exports = {
 
   superCategories: [
     'All Items',
-    'Meals',
-    'Snacks',
-    'Salad & Soup',
-    // 'Noodles',
     'Beverages',
-    // 'Combos',
+    'Snacks',
+    'Pasta & Macaroni',
+    'Main Course',
+    'Chinese ',
+    'Salads & Soups',
   ],
 
   // ── ③ ENVIRONMENT VARIABLES ──────────────────────────────────────

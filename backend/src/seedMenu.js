@@ -5,585 +5,772 @@ const MenuItem = require("./models/Menu");
 
 // All images are from Pexels (free, no attribution required for usage)
 // Format: https://images.pexels.com/photos/{ID}/pexels-photo-{ID}.jpeg?w=400&auto=compress&cs=tinysrgb
+// NOTE: these are placeholder images. Replace any of them anytime via
+// Admin Dashboard → Menu → Edit Item → Image URL.
 
 const P = (id) => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?w=400&auto=compress&cs=tinysrgb`;
 
 const menuData = [
 
-  // ─── CHINESE (Starters) ───────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BEVERAGES
+  // ═══════════════════════════════════════════════════════════════════════════
 
+  // ─── Hot Beverages ────────────────────────────────────────────────────────
   {
-    superCategory: "Chinese", subCategory: "Starters",
-    name: "Chilli Paneer Dry",
-    description: "Crispy paneer tossed in a bold chilli sauce — dry style.",
-    price: 90, halfPrice: 90, fullPrice: 170,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Cutting Tea",
+    description: "Small, strong Indian-style tea — the classic café cutting chai.",
+    price: 20, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("29631468"), // Spicy Indo-Chinese chili paneer on plate
+    image: P("1638280"),
   },
   {
-    superCategory: "Chinese", subCategory: "Starters",
-    name: "Chilli Paneer Gravy",
-    description: "Soft paneer in a rich, tangy chilli gravy sauce.",
-    price: 100, halfPrice: 100, fullPrice: 190,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Masala Tea",
+    description: "Aromatic tea brewed with traditional Indian spices.",
+    price: 35, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("29631461"), // Spicy paneer stir-fry in white bowl
+    image: P("1638280"),
   },
   {
-    superCategory: "Chinese", subCategory: "Starters",
-    name: "Chilli Potato",
-    description: "Crispy potato strips tossed in spicy chilli sauce.",
-    price: 80, halfPrice: 80, fullPrice: 150,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Elaichi Tea",
+    description: "Fragrant cardamom-infused tea — warm and soothing.",
+    price: 35, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("12737810"), // Stir-fried vegetables in bowl
+    image: P("1638280"),
   },
   {
-    superCategory: "Chinese", subCategory: "Starters",
-    name: "Honey Chilli Potato",
-    description: "Crispy potato strips glazed with honey chilli sauce — sweet, spicy & addictive.",
-    price: 90, halfPrice: 90, fullPrice: 170,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Black Tea",
+    description: "Pure, robust black tea served hot — no milk, just flavour.",
+    price: 20, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("12737816"), // Indian paneer curry with bell peppers (closest visual match)
+    image: P("4349804"),
   },
   {
-    superCategory: "Chinese", subCategory: "Starters",
-    name: "Chilli Momos Dry",
-    description: "Steamed momos tossed in a fiery chilli sauce — dry style.",
-    price: 100, halfPrice: 100, fullPrice: 190,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Ginger Tea",
+    description: "Spicy ginger-infused tea, perfect for a refreshing kick.",
+    price: 35, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("18803177"), // Tibetan momos garnished with herbs
+    image: P("1638280"),
   },
   {
-    superCategory: "Chinese", subCategory: "Starters",
-    name: "Chilli Momos Gravy",
-    description: "Steamed momos dunked in a rich, spicy chilli gravy.",
-    price: 110, halfPrice: 110, fullPrice: 210,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Green Tea",
+    description: "Light, antioxidant-rich green tea — clean and refreshing.",
+    price: 60, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3926123"), // Jhol momo in savory broth
+    image: P("4349804"),
   },
   {
-    superCategory: "Chinese", subCategory: "Starters",
-    name: "Crispy Corn",
-    description: "Golden fried corn kernels tossed with herbs and spices.",
-    price: 90, halfPrice: 90, fullPrice: 170,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Kadha (Gud/Sugar/Honey)",
+    description: "Traditional herbal kadha sweetened with your choice of jaggery, sugar or honey.",
+    price: 60, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("28674541"), // Spicy Indian paneer tikka in tomato gravy (vibrant orange — closest)
-  },
-
-  // ─── SNACKS — Momos & Springroll ──────────────────────────────────────────
-
-  {
-    superCategory: "Snacks", subCategory: "Momos & Springroll",
-    name: "Momos",
-    description: "Steamed dumplings packed with seasoned vegetables, served with chutney.",
-    price: 20, halfPrice: 20, fullPrice: 40,
-    halfDescription: "Half plate", fullDescription: "Full plate",
-    veg: true, available: true,
-    image: P("18803174"), // Tibetan momos with dipping sauces
+    image: P("4349804"),
   },
   {
-    superCategory: "Snacks", subCategory: "Momos & Springroll",
-    name: "Paneer Momos",
-    description: "Delicate steamed dumplings filled with spiced paneer and herbs.",
-    price: 30, halfPrice: 30, fullPrice: 60,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Rose Tea",
+    description: "Delicate rose-flavoured tea with a fragrant floral aroma.",
+    price: 40, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("28445589"), // Paneer momos with chutney on marble
+    image: P("1638280"),
   },
   {
-    superCategory: "Snacks", subCategory: "Momos & Springroll",
-    name: "Fried Momos",
-    description: "Golden fried crispy momos — irresistible snack.",
-    price: 30, halfPrice: 30, fullPrice: 60,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Cinnamon Tea",
+    description: "Warm, spiced tea infused with rich cinnamon flavour.",
+    price: 40, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("5409009"), // Fried round dumplings on black ceramic bowl
+    image: P("1638280"),
   },
   {
-    superCategory: "Snacks", subCategory: "Momos & Springroll",
-    name: "Springroll",
-    description: "Crispy golden rolls stuffed with seasoned vegetables.",
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Blue Tea",
+    description: "Vibrant butterfly pea flower tea — light, calming and Instagram-worthy.",
+    price: 40, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("4349804"),
+  },
+  {
+    superCategory: "Beverages", subCategory: "Hot Beverages",
+    name: "Lemon Tea",
+    description: "Tangy, citrusy tea with a refreshing twist of lemon.",
     price: 30, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3911228"), // Dim sum on ceramic plate
+    image: P("1638280"),
   },
 
-  // ─── SNACKS — Fries ───────────────────────────────────────────────────────
-
+  // ─── Coffee ───────────────────────────────────────────────────────────────
   {
-    superCategory: "Snacks", subCategory: "Fries",
-    name: "French Fries",
-    description: "Classic golden crispy fries, perfectly salted.",
+    superCategory: "Beverages", subCategory: "Coffee",
+    name: "Black Coffee",
+    description: "Pure, bold black coffee — no milk, just caffeine.",
     price: 40, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1893555"), // Classic golden french fries
+    image: P("302899"),
   },
   {
-    superCategory: "Snacks", subCategory: "Fries",
-    name: "Peri Peri Fries",
-    description: "Crispy fries dusted with spicy peri peri seasoning.",
+    superCategory: "Beverages", subCategory: "Coffee",
+    name: "Cappuccino",
+    description: "Classic Italian coffee with steamed milk and a frothy top.",
     price: 60, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("2097090"), // Seasoned fries with dip
+    image: P("302899"),
   },
   {
-    superCategory: "Snacks", subCategory: "Fries",
-    name: "Cheese Fries",
-    description: "Golden fries smothered in rich melted cheese sauce.",
-    price: 80, halfPrice: null, fullPrice: null,
+    superCategory: "Beverages", subCategory: "Coffee",
+    name: "Instant Coffee",
+    description: "Quick, comforting instant coffee — simple and satisfying.",
+    price: 30, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("4109072"), // Cheese fries close-up
+    image: P("302899"),
   },
   {
-    superCategory: "Snacks", subCategory: "Fries",
-    name: "Chinese Bhel",
-    description: "Crispy noodles tossed with vegetables and tangy sauces — a street-style favourite.",
-    price: 40, halfPrice: null, fullPrice: null,
+    superCategory: "Beverages", subCategory: "Coffee",
+    name: "Latte",
+    description: "Smooth, creamy latte with a perfect milk-to-coffee balance.",
+    price: 60, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("5409010"), // Momo dish black plate (crispy snack visual)
+    image: P("302899"),
   },
-
-  // ─── SNACKS — Sandwich ────────────────────────────────────────────────────
-
   {
-    superCategory: "Snacks", subCategory: "Sandwich",
-    name: "Veg Sandwich",
-    description: "Fresh vegetables layered in toasted bread with mint chutney.",
+    superCategory: "Beverages", subCategory: "Coffee",
+    name: "Mocha",
+    description: "Rich blend of coffee and chocolate — indulgent and bold.",
     price: 70, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1647163"), // Toast sandwich with vegetables
+    image: P("374757"),
   },
+
+  // ─── Cold Beverages ───────────────────────────────────────────────────────
   {
-    superCategory: "Snacks", subCategory: "Sandwich",
-    name: "Cheese Sandwich",
-    description: "Toasted sandwich loaded with gooey melted cheese.",
+    superCategory: "Beverages", subCategory: "Cold Beverages",
+    name: "Lassi",
+    description: "Thick, creamy yogurt-based drink — a classic Punjabi refresher.",
     price: 80, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("4518688"), // Grilled cheese sandwich close-up
+    image: P("1193335"),
   },
   {
-    superCategory: "Snacks", subCategory: "Sandwich",
-    name: "Paneer Sandwich",
-    description: "Spiced paneer filling in a toasted sandwich with fresh veggies.",
-    price: 90, halfPrice: null, fullPrice: null,
+    superCategory: "Beverages", subCategory: "Cold Beverages",
+    name: "Buttermilk",
+    description: "Light, tangy spiced buttermilk — cooling and digestive.",
+    price: 50, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("5949880"), // Indian style paneer sandwich
+    image: P("1193335"),
   },
   {
-    superCategory: "Snacks", subCategory: "Sandwich",
-    name: "Masala Corn Sandwich",
-    description: "Toasted sandwich filled with spiced sweet corn and tangy sauces.",
-    price: 90, halfPrice: null, fullPrice: null,
+    superCategory: "Beverages", subCategory: "Cold Beverages",
+    name: "Masala & Mint Buttermilk",
+    description: "Refreshing buttermilk infused with masala spices and fresh mint.",
+    price: 50, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3807517"), // Toasted sandwich with filling
+    image: P("1193335"),
   },
   {
-    superCategory: "Snacks", subCategory: "Sandwich",
-    name: "Cheese Paneer Sandwich",
-    description: "The ultimate combo — paneer and melted cheese in a toasted sandwich.",
-    price: 90, halfPrice: null, fullPrice: null,
+    superCategory: "Beverages", subCategory: "Cold Beverages",
+    name: "Lemonade",
+    description: "Chilled, zesty lemonade — the perfect thirst quencher.",
+    price: 50, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1437267"), // Loaded sandwich with cheese
+    image: P("50593"),
+  },
+  {
+    superCategory: "Beverages", subCategory: "Cold Beverages",
+    name: "Ice Tea",
+    description: "Cool, refreshing iced tea with a hint of citrus.",
+    price: 50, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("50593"),
   },
 
-  // ─── SNACKS — Burger ──────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SHAKES & SOUPS
+  // ═══════════════════════════════════════════════════════════════════════════
 
+  // ─── Shakes ───────────────────────────────────────────────────────────────
   {
-    superCategory: "Snacks", subCategory: "Burger",
-    name: "Veg Burger",
-    description: "Crispy veggie patty in a soft bun with fresh veggies and sauce.",
+    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    name: "Cold Coffee",
+    description: "Rich, frothy cold coffee blended to café perfection.",
+    price: 90, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1193335"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    name: "Cold Coffee with Ice Cream",
+    description: "Classic cold coffee crowned with a generous scoop of vanilla ice cream.",
+    price: 120, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1193335"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    name: "Oreo Shake",
+    description: "Thick, dreamy milkshake blended with crushed Oreo cookies.",
+    price: 100, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1092730"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    name: "Kitkat Shake",
+    description: "Indulgent chocolate milkshake blended with crunchy KitKat bars.",
+    price: 100, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("3727255"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    name: "Chocolate Shake",
+    description: "Pure chocolate bliss — thick, creamy and deeply satisfying.",
+    price: 100, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("3727249"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    name: "Mango Shake",
+    description: "Real mango blended into a thick, refreshing summer shake.",
+    price: 90, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("3625372"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    name: "Mix Fruit Shake",
+    description: "A vibrant blend of seasonal fresh fruits into one refreshing glass.",
+    price: 150, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("3625372"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Shakes",
+    name: "Strawberry Shake",
+    description: "Sweet, pink and luscious — a classic strawberry milkshake.",
+    price: 100, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("3727250"),
+  },
+
+  // ─── Soups ────────────────────────────────────────────────────────────────
+  {
+    superCategory: "Shakes & Soups", subCategory: "Soups",
+    name: "Veg Sweet Corn Soup",
+    description: "Creamy, comforting sweet corn soup with a hint of pepper.",
+    price: 80, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("699953"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Soups",
+    name: "Veg Manchow Soup",
+    description: "Thick, spicy Indo-Chinese soup loaded with vegetables and crispy noodles.",
+    price: 80, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("699953"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Soups",
+    name: "Veg Hot & Sour Soup",
+    description: "Bold, tangy soup with the perfect balance of heat and sourness.",
+    price: 80, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("699953"),
+  },
+  {
+    superCategory: "Shakes & Soups", subCategory: "Soups",
+    name: "Tomato Soup",
+    description: "Rich, velvety tomato soup with fresh basil and a swirl of cream.",
+    price: 80, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1279330"),
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SNACKS (Maggi · Burger · Sandwich · Tea Complimentary)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ─── Maggi ────────────────────────────────────────────────────────────────
+  {
+    superCategory: "Snacks", subCategory: "Maggi",
+    name: "Veg Maggi",
+    description: "Everyone's favourite — classic Maggi noodles with fresh vegetables.",
     price: 60, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1639562"), // Veggie burger on wooden board
+    image: P("4393021"),
+  },
+  {
+    superCategory: "Snacks", subCategory: "Maggi",
+    name: "Paneer Maggi",
+    description: "Creamy Maggi noodles loaded with soft paneer cubes and spices.",
+    price: 70, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("7625260"),
+  },
+  {
+    superCategory: "Snacks", subCategory: "Maggi",
+    name: "Cheese & Corn Maggi",
+    description: "Gooey melted cheese and sweet corn mixed into hot Maggi.",
+    price: 50, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("3026810"),
+  },
+  {
+    superCategory: "Snacks", subCategory: "Maggi",
+    name: "Soup Maggi",
+    description: "Warm, soupy Maggi noodles in a comforting broth — perfect for cold days.",
+    price: 50, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("5560149"),
+  },
+
+  // ─── Burger ───────────────────────────────────────────────────────────────
+  {
+    superCategory: "Snacks", subCategory: "Burger",
+    name: "Veg Burger (Aloo Tikki)",
+    description: "Crispy spiced potato tikki patty in a soft bun with fresh veggies.",
+    price: 90, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1639562"),
   },
   {
     superCategory: "Snacks", subCategory: "Burger",
     name: "Paneer Burger",
     description: "Grilled paneer patty topped with fresh veggies and secret café sauce.",
-    price: 80, halfPrice: null, fullPrice: null,
+    price: 120, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3738406"), // Burger with fresh ingredients
+    image: P("3738406"),
   },
   {
     superCategory: "Snacks", subCategory: "Burger",
     name: "Cheese Burger",
     description: "Double cheese slices melt over a crispy patty — pure cheesy bliss.",
-    price: 80, halfPrice: null, fullPrice: null,
+    price: 120, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1199957"), // Classic cheeseburger close-up
+    image: P("1199957"),
   },
   {
     superCategory: "Snacks", subCategory: "Burger",
-    name: "Paneer + Cheese Burger",
-    description: "The best of both worlds — paneer patty with extra cheese.",
-    price: 100, halfPrice: null, fullPrice: null,
+    name: "Schezwan Cheese Burger",
+    description: "A fiery Schezwan kick topped with melted cheese — for the brave ones.",
+    price: 150, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("2271107"), // Double loaded burger
+    image: P("2271107"),
   },
 
-  // ─── PASTA & MAGGIE — Pasta ───────────────────────────────────────────────
-
+  // ─── Sandwiches ───────────────────────────────────────────────────────────
   {
-    superCategory: "Pasta & Maggie", subCategory: "Pasta",
-    name: "Red Sauce Pasta",
-    description: "Al dente pasta smothered in a rich, tangy tomato-based Arrabbiata sauce.",
-    price: 129, halfPrice: null, fullPrice: null,
+    superCategory: "Snacks", subCategory: "Sandwiches",
+    name: "Veg Sandwich",
+    description: "Fresh vegetables layered in toasted bread with mint chutney.",
+    price: 90, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1279330"), // Red sauce pasta in bowl
+    image: P("1647163"),
   },
   {
-    superCategory: "Pasta & Maggie", subCategory: "Pasta",
-    name: "White Sauce Pasta",
-    description: "Creamy béchamel pasta with herbs — comforting and indulgent.",
-    price: 139, halfPrice: null, fullPrice: null,
+    superCategory: "Snacks", subCategory: "Sandwiches",
+    name: "Paneer Sandwich",
+    description: "Spiced paneer filling in a toasted sandwich with fresh veggies.",
+    price: 120, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1438672"), // Creamy white pasta in bowl
+    image: P("5949880"),
   },
   {
-    superCategory: "Pasta & Maggie", subCategory: "Pasta",
-    name: "Cheesey Baked Pasta",
-    description: "Oven-baked pasta loaded with melted cheese — rich and irresistible.",
-    price: 159, halfPrice: null, fullPrice: null,
+    superCategory: "Snacks", subCategory: "Sandwiches",
+    name: "Double Cheese Veg Sandwich",
+    description: "Loaded with double cheese and fresh vegetables — extra indulgent.",
+    price: 150, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3887946"), // Baked cheesy pasta dish
+    image: P("4518688"),
   },
   {
-    superCategory: "Pasta & Maggie", subCategory: "Pasta",
-    name: "Macaroni",
-    description: "Classic macaroni pasta tossed with vegetables and a light sauce.",
-    price: 39, halfPrice: null, fullPrice: null,
+    superCategory: "Snacks", subCategory: "Sandwiches",
+    name: "Double Cheese Paneer Sandwich",
+    description: "The ultimate combo — paneer and double melted cheese in toasted bread.",
+    price: 190, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1527603"), // Macaroni pasta bowl
-  },
-
-  // ─── PASTA & MAGGIE — Maggi ───────────────────────────────────────────────
-
-  {
-    superCategory: "Pasta & Maggie", subCategory: "Maggie",
-    name: "Plain Maggi",
-    description: "Classic Maggi noodles prepared to perfection — simple and satisfying.",
-    price: 25, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("4393021"), // Instant noodles in bowl
+    image: P("1437267"),
   },
   {
-    superCategory: "Pasta & Maggie", subCategory: "Maggie",
-    name: "Butter Maggi",
-    description: "Maggi noodles cooked in generous butter for a rich, comforting taste.",
-    price: 35, halfPrice: null, fullPrice: null,
+    superCategory: "Snacks", subCategory: "Sandwiches",
+    name: "Veg Grill Sandwich",
+    description: "Perfectly grilled sandwich packed with fresh, crunchy vegetables.",
+    price: 180, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("5560149"), // Buttery noodles in bowl
-  },
-  {
-    superCategory: "Pasta & Maggie", subCategory: "Maggie",
-    name: "Veg Maggi",
-    description: "Everyone's favourite — classic Maggi noodles with fresh vegetables.",
-    price: 45, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("6544370"), // Noodles with vegetables
-  },
-  {
-    superCategory: "Pasta & Maggie", subCategory: "Maggie",
-    name: "Paneer Maggi",
-    description: "Creamy Maggi noodles loaded with soft paneer cubes and spices.",
-    price: 60, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("7625260"), // Noodles with paneer-style topping
-  },
-  {
-    superCategory: "Pasta & Maggie", subCategory: "Maggie",
-    name: "Cheese Maggi",
-    description: "Gooey melted cheese mixed into hot Maggi — pure comfort in a bowl.",
-    price: 60, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("3026810"), // Cheesy noodle bowl
-  },
-  {
-    superCategory: "Pasta & Maggie", subCategory: "Maggie",
-    name: "Chilli Garlic Maggi",
-    description: "Spicy Maggi noodles with a punch of chilli and aromatic garlic.",
-    price: 70, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("699953"), // Spicy noodles in bowl
-  },
-  {
-    superCategory: "Pasta & Maggie", subCategory: "Maggie",
-    name: "Schezwan Maggi",
-    description: "Bold Schezwan sauce meets Maggi noodles for a fiery Indo-Chinese kick.",
-    price: 70, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("1640777"), // Red spicy noodles
+    image: P("3807517"),
   },
 
-  // ─── NOODLES ──────────────────────────────────────────────────────────────
-
+  // ─── Tea Complimentary ────────────────────────────────────────────────────
   {
-    superCategory: "Noodles", subCategory: "Noodles",
-    name: "Veg Noodles",
-    description: "Wok-tossed noodles with fresh vegetables and fragrant seasoning.",
-    price: 70, halfPrice: 70, fullPrice: 130,
-    halfDescription: "Half plate", fullDescription: "Full plate",
+    superCategory: "Snacks", subCategory: "Tea Complimentary",
+    name: "Bun Maska",
+    description: "Soft bun generously spread with creamy butter — a café classic pairing.",
+    price: 50, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3026808"), // Stir-fried noodles with vegetables
+    image: P("1638280"),
   },
   {
-    superCategory: "Noodles", subCategory: "Noodles",
-    name: "Hakka Noodles",
-    description: "Classic Hakka-style noodles tossed with vegetables and soy sauce.",
-    price: 80, halfPrice: 80, fullPrice: 150,
-    halfDescription: "Half plate", fullDescription: "Full plate",
-    veg: true, available: true,
-    image: P("2347311"), // Asian noodles in bowl with chopsticks
-  },
-  {
-    superCategory: "Noodles", subCategory: "Noodles",
-    name: "Chilli Garlic Noodles",
-    description: "Noodles packed with the bold flavours of chilli and garlic.",
-    price: 80, halfPrice: 80, fullPrice: 150,
-    halfDescription: "Half plate", fullDescription: "Full plate",
-    veg: true, available: true,
-    image: P("1279330"), // Spicy noodle dish
-  },
-  {
-    superCategory: "Noodles", subCategory: "Noodles",
-    name: "Schezwan Noodles",
-    description: "Fiery Schezwan sauce meets perfectly stir-fried noodles.",
-    price: 80, halfPrice: 80, fullPrice: 150,
-    halfDescription: "Half plate", fullDescription: "Full plate",
-    veg: true, available: true,
-    image: P("3763847"), // Red spicy noodles stir-fry
-  },
-  {
-    superCategory: "Noodles", subCategory: "Noodles",
-    name: "Paneer Noodles",
-    description: "Stir-fried noodles elevated with soft, spiced paneer cubes.",
-    price: 90, halfPrice: 90, fullPrice: 160,
-    halfDescription: "Half plate", fullDescription: "Full plate",
-    veg: true, available: true,
-    image: P("31783383"), // Indian-Chinese fusion Manchurian Paneer with fried rice
-  },
-
-  // ─── NOODLES — Fried Rice ─────────────────────────────────────────────────
-
-  {
-    superCategory: "Noodles", subCategory: "Fried Rice",
-    name: "Veg Fried Rice",
-    description: "Wok-tossed rice with fresh vegetables and fragrant seasoning.",
-    price: 70, halfPrice: 70, fullPrice: 130,
-    halfDescription: "Half plate", fullDescription: "Full plate",
-    veg: true, available: true,
-    image: P("723198"), // Fried rice in wok
-  },
-  {
-    superCategory: "Noodles", subCategory: "Fried Rice",
-    name: "Schezwan Fried Rice",
-    description: "Bold, fiery Schezwan sauce meets perfectly fried rice.",
-    price: 80, halfPrice: 80, fullPrice: 150,
-    halfDescription: "Half plate", fullDescription: "Full plate",
-    veg: true, available: true,
-    image: P("1624487"), // Spicy fried rice with red chilli
-  },
-  {
-    superCategory: "Noodles", subCategory: "Fried Rice",
-    name: "Chilli Garlic Fried Rice",
-    description: "Fried rice with a punchy chilli garlic flavour profile.",
-    price: 80, halfPrice: 80, fullPrice: 150,
-    halfDescription: "Half plate", fullDescription: "Full plate",
-    veg: true, available: true,
-    image: P("3026804"), // Fried rice with garlic and vegetables
-  },
-  {
-    superCategory: "Noodles", subCategory: "Fried Rice",
-    name: "Paneer Fried Rice",
-    description: "Classic fried rice elevated with fresh paneer cubes and aromatic spices.",
-    price: 90, halfPrice: 90, fullPrice: 160,
-    halfDescription: "Half plate", fullDescription: "Full plate",
-    veg: true, available: true,
-    image: P("9609859"), // Paneer biryani with sauces
-  },
-
-  // ─── BEVERAGES — Chai & Coffee ────────────────────────────────────────────
-
-  {
-    superCategory: "Beverages", subCategory: "Chai & Coffee",
-    name: "Chai",
-    description: "Classic Indian masala chai — warm, spiced and comforting.",
-    price: 20, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("1638280"), // Masala chai in glass
-  },
-  {
-    superCategory: "Beverages", subCategory: "Chai & Coffee",
-    name: "Gud Chai",
-    description: "Traditional chai sweetened with jaggery for an earthy, natural sweetness.",
-    price: 30, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("4349804"), // Rustic tea in clay cup
-  },
-  {
-    superCategory: "Beverages", subCategory: "Chai & Coffee",
-    name: "Coffee",
-    description: "Classic hot coffee, freshly brewed to warm you up.",
-    price: 35, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("302899"), // Hot coffee in white cup
-  },
-  {
-    superCategory: "Beverages", subCategory: "Chai & Coffee",
-    name: "Strong Coffee",
-    description: "Extra bold, strong brewed coffee for serious coffee lovers.",
+    superCategory: "Snacks", subCategory: "Tea Complimentary",
+    name: "Bread Butter",
+    description: "Simple toasted bread slices with a generous layer of butter.",
     price: 40, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("374757"), // Dark espresso in cup
+    image: P("4518688"),
+  },
+  {
+    superCategory: "Snacks", subCategory: "Tea Complimentary",
+    name: "Peanut Butter Bread",
+    description: "Toasted bread slathered with rich, creamy peanut butter.",
+    price: 60, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1647163"),
+  },
+  {
+    superCategory: "Snacks", subCategory: "Tea Complimentary",
+    name: "Garlic Bread",
+    description: "Crispy toasted bread infused with aromatic garlic butter.",
+    price: 120, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1438672"),
+  },
+  {
+    superCategory: "Snacks", subCategory: "Tea Complimentary",
+    name: "Cheese Garlic Bread",
+    description: "Garlic bread loaded with melted cheese — rich and irresistible.",
+    price: 150, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("3887946"),
   },
 
-  // ─── BEVERAGES — Shakes & Cold Coffee ────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PASTA & MACARONI
+  // ═══════════════════════════════════════════════════════════════════════════
 
   {
-    superCategory: "Beverages", subCategory: "Shakes & Cold Coffee",
-    name: "Strawberry Shake",
-    description: "Sweet, pink and luscious — a classic strawberry milkshake.",
-    price: 99, halfPrice: null, fullPrice: null,
+    superCategory: "Pasta & Macaroni", subCategory: "Macaroni",
+    name: "Veg Macaroni",
+    description: "Classic macaroni pasta tossed with seasonal vegetables and rich sauce.",
+    price: 90, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3727250"), // Pink strawberry milkshake with straw
+    image: P("1527603"),
   },
   {
-    superCategory: "Beverages", subCategory: "Shakes & Cold Coffee",
-    name: "Oreo Shake",
-    description: "Thick, dreamy milkshake blended with crushed Oreo cookies.",
-    price: 99, halfPrice: null, fullPrice: null,
+    superCategory: "Pasta & Macaroni", subCategory: "Pasta",
+    name: "Red Sauce Pasta",
+    description: "Al dente pasta smothered in a rich, tangy tomato-based Arrabbiata sauce.",
+    price: 210, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1092730"), // Dark cookies and cream milkshake
+    image: P("1279330"),
   },
   {
-    superCategory: "Beverages", subCategory: "Shakes & Cold Coffee",
-    name: "KitKat Shake",
-    description: "Indulgent chocolate milkshake blended with crunchy KitKat bars.",
-    price: 99, halfPrice: null, fullPrice: null,
+    superCategory: "Pasta & Macaroni", subCategory: "Pasta",
+    name: "White Sauce Pasta",
+    description: "Creamy béchamel pasta with herbs — comforting and indulgent.",
+    price: 290, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3727255"), // Chocolate shake with wafer
+    image: P("1438672"),
   },
   {
-    superCategory: "Beverages", subCategory: "Shakes & Cold Coffee",
-    name: "Chocolate Shake",
-    description: "Pure chocolate bliss — thick, creamy and deeply satisfying.",
-    price: 99, halfPrice: null, fullPrice: null,
+    superCategory: "Pasta & Macaroni", subCategory: "Pasta",
+    name: "Wheat Pasta",
+    description: "Healthy whole wheat pasta packed with fresh garden vegetables.",
+    price: 300, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3727249"), // Rich chocolate milkshake
-  },
-  {
-    superCategory: "Beverages", subCategory: "Shakes & Cold Coffee",
-    name: "Cold Coffee",
-    description: "Rich, frothy cold coffee blended to café perfection.",
-    price: 89, halfPrice: null, fullPrice: null,
-    veg: true, available: true,
-    image: P("1193335"), // Iced cold coffee with foam
+    image: P("3887946"),
   },
 
-  // ─── BEVERAGES — Soft Drinks ──────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MAIN COURSE & CHINESE
+  // ═══════════════════════════════════════════════════════════════════════════
 
+  // ─── Momo Special ─────────────────────────────────────────────────────────
   {
-    superCategory: "Beverages", subCategory: "Soft Drinks",
-    name: "Sprite",
-    description: "Chilled refreshing Sprite — the perfect thirst quencher.",
-    price: 20, halfPrice: null, fullPrice: null,
+    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    name: "Steam Veg Momos (8 pcs)",
+    description: "Steamed dumplings packed with seasoned vegetables, served with chutney.",
+    price: 50, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("50593"), // Cold fizzy drink with ice
+    image: P("18803174"),
   },
   {
-    superCategory: "Beverages", subCategory: "Soft Drinks",
-    name: "Thumbs Up",
-    description: "Bold and fizzy Thums Up cola — strong taste, great refreshment.",
-    price: 20, halfPrice: null, fullPrice: null,
+    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    name: "Steam Paneer Momos (8 pcs)",
+    description: "Delicate steamed dumplings filled with spiced paneer and herbs.",
+    price: 70, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("2775218"), // Dark cola with ice in glass
+    image: P("28445589"),
   },
   {
-    superCategory: "Beverages", subCategory: "Soft Drinks",
-    name: "Coke",
-    description: "Classic chilled Coca-Cola — timeless and refreshing.",
-    price: 20, halfPrice: null, fullPrice: null,
+    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    name: "Soup Momos (6 pcs)",
+    description: "Momos served in a flavourful, aromatic soup broth — warming and satisfying.",
+    price: 80, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("2775218"), // Cola with ice and bubbles
+    image: P("3926123"),
   },
   {
-    superCategory: "Beverages", subCategory: "Soft Drinks",
-    name: "Maaza",
-    description: "Sweet mango drink — a tropical burst of flavour.",
-    price: 20, halfPrice: null, fullPrice: null,
+    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    name: "Jhol Momos (6 pcs)",
+    description: "Nepali-style momos bathed in a spicy, tangy jhol achar sauce.",
+    price: 100, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3625372"), // Mango juice drink in glass
+    image: P("28445593"),
+  },
+  {
+    superCategory: "Main Course & Chinese", subCategory: "Momo Special",
+    name: "Afgani Momos (6 pcs)",
+    description: "Momos in a rich, creamy white Afghani sauce — truly indulgent.",
+    price: 120, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("18803177"),
   },
 
-  // ─── COMBOS ───────────────────────────────────────────────────────────────
+  // ─── Tikka & Kebab ────────────────────────────────────────────────────────
+  {
+    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    name: "Paneer Tikka",
+    description: "Char-grilled marinated paneer cubes with bell peppers and onions.",
+    price: 300, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("28674541"),
+  },
+  {
+    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    name: "Beetroot Kebab",
+    description: "Vibrant beetroot kebabs, spiced and grilled to smoky perfection.",
+    price: 200, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("12737816"),
+  },
+  {
+    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    name: "Chickpea Kebab",
+    description: "Protein-rich chickpea kebabs with a crispy outer crust.",
+    price: 200, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("12737810"),
+  },
+  {
+    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    name: "Crispy Corn Kebab",
+    description: "Golden fried corn kebabs with herbs and a crunchy bite.",
+    price: 250, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("28674541"),
+  },
+  {
+    superCategory: "Main Course & Chinese", subCategory: "Tikka & Kebab",
+    name: "Crispy Baby Corn",
+    description: "Crunchy battered baby corn, fried golden and flavour-packed.",
+    price: 250, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("12737810"),
+  },
 
+  // ─── Noodles & Rice ───────────────────────────────────────────────────────
   {
-    superCategory: "Combos", subCategory: "Combos",
-    name: "Chilli Paneer & Noodles",
-    description: "Chilli Paneer paired with your choice of noodles — a satisfying combo.",
-    price: 89, halfPrice: 89, fullPrice: 149,
-    halfDescription: "Half combo", fullDescription: "Full combo",
+    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    name: "Veg Chowmein",
+    description: "Wok-tossed noodles with fresh vegetables and fragrant seasoning.",
+    price: 130, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("31783383"), // Indian-Chinese Manchurian Paneer with fried rice
+    image: P("3026808"),
   },
   {
-    superCategory: "Combos", subCategory: "Combos",
-    name: "Chilli Paneer & Fried Rice",
-    description: "Chilli Paneer served alongside fragrant fried rice — a classic combo.",
-    price: 89, halfPrice: 89, fullPrice: 149,
-    halfDescription: "Half combo", fullDescription: "Full combo",
+    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    name: "Paneer Chowmein",
+    description: "Stir-fried noodles elevated with soft, spiced paneer cubes.",
+    price: 150, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("29631461"), // Paneer stir-fry with rice combo
+    image: P("31783383"),
   },
   {
-    superCategory: "Combos", subCategory: "Combos",
-    name: "Chilli Potato & Noodles",
-    description: "Spicy Chilli Potato with a side of flavourful noodles.",
-    price: 69, halfPrice: 69, fullPrice: 129,
-    halfDescription: "Half combo", fullDescription: "Full combo",
+    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    name: "Hakka Noodles",
+    description: "Classic Hakka-style noodles tossed with vegetables and soy sauce.",
+    price: 150, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("3026808"), // Potato & noodle combo
+    image: P("2347311"),
   },
   {
-    superCategory: "Combos", subCategory: "Combos",
-    name: "Chilli Potato & Fried Rice",
-    description: "Crispy Chilli Potato paired with wok-tossed fried rice.",
-    price: 69, halfPrice: 69, fullPrice: 129,
-    halfDescription: "Half combo", fullDescription: "Full combo",
+    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    name: "Veg Fried Rice",
+    description: "Wok-tossed rice with fresh vegetables and fragrant seasoning.",
+    price: 150, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("723198"), // Potato with fried rice
+    image: P("723198"),
   },
   {
-    superCategory: "Combos", subCategory: "Combos",
-    name: "Chilli Momos & Fried Rice",
-    description: "Spicy Chilli Momos with a generous serving of fried rice.",
-    price: 89, halfPrice: 89, fullPrice: 149,
-    halfDescription: "Half combo", fullDescription: "Full combo",
+    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    name: "Paneer Fried Rice",
+    description: "Classic fried rice elevated with fresh paneer cubes and aromatic spices.",
+    price: 250, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("18803174"), // Momos with dipping sauce
+    image: P("9609859"),
   },
   {
-    superCategory: "Combos", subCategory: "Combos",
-    name: "Chilli Momos & Noodles",
-    description: "Spicy Chilli Momos paired with stir-fried noodles.",
-    price: 89, halfPrice: 89, fullPrice: 149,
-    halfDescription: "Half combo", fullDescription: "Full combo",
+    superCategory: "Main Course & Chinese", subCategory: "Noodles & Rice",
+    name: "Schezwan Fried Rice",
+    description: "Bold, fiery Schezwan sauce meets perfectly fried rice for a spicy treat.",
+    price: 250, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("28445593"), // Nepalese momos with chutney
+    image: P("1624487"),
+  },
+
+  // ─── Chinese Starters ─────────────────────────────────────────────────────
+  {
+    superCategory: "Main Course & Chinese", subCategory: "Chinese Starters",
+    name: "Veg Manchurian (Dry/Gravy)",
+    description: "Crispy vegetable balls tossed in a tangy, spicy sauce — choose Dry or Gravy.",
+    price: 180, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("29631468"),
   },
   {
-    superCategory: "Combos", subCategory: "Combos",
-    name: "Chai & Maggi",
-    description: "A warm cup of chai paired with classic Maggi — the ultimate snack combo.",
-    price: 59, halfPrice: null, fullPrice: null,
+    superCategory: "Main Course & Chinese", subCategory: "Chinese Starters",
+    name: "Paneer Manchurian (Dry/Gravy)",
+    description: "Soft paneer cubes in a rich Manchurian sauce — choose Dry or Gravy.",
+    price: 200, halfPrice: null, fullPrice: null,
     veg: true, available: true,
-    image: P("1638280"), // Chai with noodles combo
+    image: P("29631461"),
+  },
+  {
+    superCategory: "Main Course & Chinese", subCategory: "Chinese Starters",
+    name: "Paneer Chilli (Dry/Gravy)",
+    description: "Juicy paneer tossed with bell peppers and chilli sauce — choose Dry or Gravy.",
+    price: 250, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("29631461"),
+  },
+  {
+    superCategory: "Main Course & Chinese", subCategory: "Chinese Starters",
+    name: "Honey Chilli Potato",
+    description: "Crispy potato strips glazed with honey chilli sauce — sweet, spicy & addictive.",
+    price: 150, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("12737816"),
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PIZZA, FRIES & SALADS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ─── Pizza ────────────────────────────────────────────────────────────────
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Pizza",
+    name: "Margherita Pizza",
+    description: "Classic cheese pizza with a rich tomato base — timeless and simple.",
+    price: 200, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("825661"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Pizza",
+    name: "Onion & Capsicum Pizza",
+    description: "Loaded with fresh onions and crunchy capsicum on a cheesy base.",
+    price: 250, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1146760"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Pizza",
+    name: "Paneer Pizza",
+    description: "Spiced paneer chunks generously topped over melted cheese.",
+    price: 300, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("825661"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Pizza",
+    name: "Farmhouse Pizza",
+    description: "Loaded veggie pizza with onions, capsicum, tomato, corn and olives.",
+    price: 400, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1146760"),
+  },
+
+  // ─── Fries ────────────────────────────────────────────────────────────────
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Fries",
+    name: "Salted Fries",
+    description: "Classic golden crispy fries, perfectly salted.",
+    price: 70, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1893555"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Fries",
+    name: "Peri-Peri Fries",
+    description: "Crispy fries dusted with spicy peri-peri seasoning.",
+    price: 90, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("2097090"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Fries",
+    name: "Cheese Fries",
+    description: "Golden fries smothered in rich melted cheese sauce.",
+    price: 120, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("4109072"),
+  },
+
+  // ─── Salads ───────────────────────────────────────────────────────────────
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    name: "Fruit Chaat",
+    description: "Refreshing mix of seasonal fruits tossed with chaat masala.",
+    price: 100, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("3625372"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    name: "Fruit Custard",
+    description: "Chilled creamy custard loaded with fresh seasonal fruits.",
+    price: 150, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1092730"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    name: "Fruit Salad with Ice Cream",
+    description: "Fresh fruit salad topped with a generous scoop of vanilla ice cream.",
+    price: 200, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("3727250"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    name: "Cucumber Salad",
+    description: "Light, crisp cucumber salad with a refreshing tangy dressing.",
+    price: 100, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("699953"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    name: "Paneer & Veggie Salad",
+    description: "Fresh vegetables and soft paneer cubes in a wholesome salad bowl.",
+    price: 150, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("12737816"),
+  },
+  {
+    superCategory: "Pizza, Fries & Salads", subCategory: "Salads",
+    name: "Soya Chunks Salad",
+    description: "Protein-packed soya chunks tossed with fresh vegetables and herbs.",
+    price: 190, halfPrice: null, fullPrice: null,
+    veg: true, available: true,
+    image: P("1058114"),
   },
 ];
 

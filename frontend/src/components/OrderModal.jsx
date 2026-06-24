@@ -103,6 +103,15 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
     setUtr('');
   }, [orderType, tableFromQR]);
 
+  // ── Auto-generate customer name — no user input needed ────────────────────
+  useEffect(() => {
+    if (orderType === 'takeaway') {
+      setName(phone.trim() ? `Guest-${phone.trim().slice(-4)}` : 'Guest');
+    } else {
+      setName(table.trim() ? `Guest-Table${table.trim()}` : 'Guest');
+    }
+  }, [orderType, table, phone]);
+
   // ── Real-time polling every 3s ─────────────────────────────────────────────
   useEffect(() => {
     if (step !== 'success' || !orderId) return;
@@ -150,7 +159,6 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) return setError('Please enter your name.');
     if (orderType === 'dine-in' && !table.trim()) return setError('Please enter your table number.');
     if (orderType === 'takeaway') {
       if (!phone.trim()) return setError('Please enter your mobile number.');
@@ -403,13 +411,6 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
               </div>
 
               <form onSubmit={handleFormSubmit} className="px-6 pb-6 space-y-3">
-                {/* Name */}
-                <div>
-                  <label className="block font-bold text-sm mb-1" style={{ color: 'var(--ordermodelbgtext)' }}>Your Name *</label>
-                  <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your name" className="input-base" maxLength={50} autoFocus />
-                </div>
-
                 {/* Phone — takeaway only */}
                 {isTakeaway && (
                   <div>
@@ -440,16 +441,6 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
                     {tableFromQR && <p className="text-gray-100 text-xs mt-1">📍 Auto-detected from QR code</p>}
                   </div>
                 )}
-
-                {/* Note */}
-                <div>
-                  <label className="block font-bold text-sm mb-1" style={{ color: 'var(--ordermodelbgtext)' }}>
-                    Special Note <span className="font-normal" style={{ color: 'var(--ordermodelbgtext)' }}>(optional)</span>
-                  </label>
-                  <textarea value={note} onChange={(e) => setNote(e.target.value)}
-                    placeholder="Allergies or special requests?" rows={2}
-                    className="input-base resize-none" maxLength={200} />
-                </div>
 
                 {/* Coupon code input */}
                 <CouponInput
@@ -726,10 +717,6 @@ const OrderModal = ({ isOpen, onClose, tableFromQR }) => {
               <div className="bg-white rounded-2xl p-4 border border-gray-100 text-left mb-4 shadow-sm">
                 <p className="text-[10px] font-black text-black uppercase tracking-widest mb-3">Order Summary</p>
                 <div className="space-y-1.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Name</span>
-                    <span className="font-bold text-black">{name}</span>
-                  </div>
                   {savedOrderType === 'dine-in' && (
                     <div className="flex justify-between">
                       <span className="text-gray-500">Table</span>

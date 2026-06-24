@@ -88,12 +88,12 @@ export const cafeConfig = {
 
   superCategories: [
     'All Items',
-    'Meals',
-    'Snacks',
-    'Salad & Soup',
-    // 'Noodles',
     'Beverages',
-    // 'Combos',
+    'Snacks',
+    'Pasta & Macaroni',
+    'Main Course',
+    'Chinese ',
+    'Salads & Soups',
   ],
 
 
